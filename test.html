@@ -1,6 +1,44 @@
-<div style="padding-bottom:56.25%; position:relative; display:block; width: 100%">
-  <iframe width="100%" height="90%"
-    src="https://app.powerbi.com/view?r=eyJrIjoiMDkzYmUzOGUtZTUyNS00ZmJjLTg5MDAtNGQ5MGM3NTVkNzVmIiwidCI6IjY2N2Q5ZWNlLWE4M2YtNDlkMi05Yjk2LTcyMmVkNjQzYzI1ZiIsImMiOjEwfQ%3D%3D&embedImagePlaceholder=true"
-    frameborder="0" allowfullscreen="" style="position:absolute; top:0; left: 0">
-  </iframe>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n8n Demo Component Embed via CDN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f7f7f7;
+        }
+        n8n-demo {
+	--n8n-frame-background-color: black;
+	--n8n-json-background-color: lightgray;
+	--n8n-copy-button-background-color: green;
+	--n8n-workflow-min-height: 500px;
+	--n8n-iframe-border-radius: 30px
+}
+    </style>
+
+    <!-- Polyfills cho Web Components -->
+    <script src="https://cdn.jsdelivr.net/npm/@webcomponents/webcomponentsjs@2.0.0/webcomponents-loader.js"></script>
+    <!-- Polyfill cho Lit -->
+    <script src="https://www.unpkg.com/lit@2.0.0-rc.2/polyfill-support.js"></script>
+    <!-- Component chính từ n8n -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@n8n_io/n8n-demo-component/n8n-demo.bundled.js"></script>
+</head>
+
+<body>
+    <h1>n8n-demo Component Demo</h1>
+
+    <n8n-demo
+        workflow="{&quot;id&quot;:&quot;iFkGAiVn3yBlykIG&quot;,&quot;meta&quot;:{&quot;instanceId&quot;:&quot;558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a&quot;},&quot;name&quot;:&quot;Chinese Translator&quot;,&quot;tags&quot;:[{&quot;id&quot;:&quot;IhTa6egt1w8uqn9Z&quot;,&quot;name&quot;:&quot;_ACTIVE&quot;,&quot;createdAt&quot;:&quot;2025-03-12T05:07:05.060Z&quot;,&quot;updatedAt&quot;:&quot;2025-03-12T05:07:05.060Z&quot;},{&quot;id&quot;:&quot;0xpEHcJjNRRRMtEj&quot;,&quot;name&quot;:&quot;lin&quot;,&quot;createdAt&quot;:&quot;2025-03-12T05:06:24.112Z&quot;,&quot;updatedAt&quot;:&quot;2025-03-12T05:06:24.112Z&quot;}],&quot;nodes&quot;:[{&quot;id&quot;:&quot;3ebfb7f1-b655-405b-8bde-0219fa92d09c&quot;,&quot;name&quot;:&quot;Line Webhook&quot;,&quot;type&quot;:&quot;n8n-nodes-base.webhook&quot;,&quot;position&quot;:[-260,-20],&quot;webhookId&quot;:&quot;b2b119e6-6de5-4684-9a51-4706a1c20caf&quot;,&quot;parameters&quot;:{&quot;path&quot;:&quot;cn&quot;,&quot;options&quot;:{},&quot;httpMethod&quot;:&quot;POST&quot;},&quot;typeVersion&quot;:2},{&quot;id&quot;:&quot;b7fc7675-f8d7-4e7e-bec3-f9c626ba1728&quot;,&quot;name&quot;:&quot;Use OpenRouter&quot;,&quot;type&quot;:&quot;n8n-nodes-base.httpRequest&quot;,&quot;position&quot;:[500,-20],&quot;parameters&quot;:{&quot;url&quot;:&quot;https://openrouter.ai/api/v1/chat/completions&quot;,&quot;method&quot;:&quot;POST&quot;,&quot;options&quot;:{},&quot;jsonBody&quot;:&quot;={\n  \&quot;model\&quot;: \&quot;qwen/qwen-max\&quot;,\n  \&quot;messages\&quot;: [\n    {\n      \&quot;role\&quot;: \&quot;system\&quot;,\n      \&quot;content\&quot;: \&quot;please provide chinese character, pinyin and translation in english. if the input is in english, you will translate and also provide chinese character, pinyin and translation in english for each word\&quot;\n    },\n     {\n      \&quot;role\&quot;: \&quot;user\&quot;,\n      \&quot;content\&quot;: \&quot;{{ $('Line Webhook').item.json.body.events[0].message.text }}\&quot;\n    }\n  ]\n} &quot;,&quot;sendBody&quot;:true,&quot;specifyBody&quot;:&quot;json&quot;,&quot;authentication&quot;:&quot;genericCredentialType&quot;,&quot;genericAuthType&quot;:&quot;httpHeaderAuth&quot;},&quot;credentials&quot;:{&quot;httpHeaderAuth&quot;:{&quot;id&quot;:&quot;7Y8q0dS2Y1fcvzTl&quot;,&quot;name&quot;:&quot;OpenRouter.ai&quot;}},&quot;typeVersion&quot;:4.2},{&quot;id&quot;:&quot;fed14d64-d3ea-4a17-98d5-28d889ac4ffa&quot;,&quot;name&quot;:&quot;Line Reply&quot;,&quot;type&quot;:&quot;n8n-nodes-base.httpRequest&quot;,&quot;position&quot;:[880,-20],&quot;parameters&quot;:{&quot;url&quot;:&quot;https://api.line.me/v2/bot/message/reply&quot;,&quot;method&quot;:&quot;POST&quot;,&quot;options&quot;:{},&quot;jsonBody&quot;:&quot;={\n  \&quot;replyToken\&quot;: \&quot;{{ $('Line Webhook').item.json.body.events[0].replyToken }}\&quot;,\n  \&quot;messages\&quot;: [\n    {\n      \&quot;type\&quot;: \&quot;text\&quot;,\n      \&quot;text\&quot;: \&quot;{{ $json.choices[0].message.content.replaceAll(\&quot;\\n\&quot;,\&quot;\\\\n\&quot;).replaceAll(\&quot;\\n\&quot;,\&quot;\&quot;).removeMarkdown().removeTags().replaceAll('\&quot;',\&quot;\&quot;) }}\&quot;\n    }\n  ]\n} &quot;,&quot;sendBody&quot;:true,&quot;specifyBody&quot;:&quot;json&quot;,&quot;authentication&quot;:&quot;genericCredentialType&quot;,&quot;genericAuthType&quot;:&quot;httpHeaderAuth&quot;},&quot;credentials&quot;:{&quot;httpHeaderAuth&quot;:{&quot;id&quot;:&quot;3IEOzxKOUr6OEXyU&quot;,&quot;name&quot;:&quot;Line @405jtfqs LazyChinese&quot;}},&quot;typeVersion&quot;:4.2},{&quot;id&quot;:&quot;63ae844f-dfc3-4e8f-97d0-c0ec4be7858f&quot;,&quot;name&quot;:&quot;Line Loading Animation&quot;,&quot;type&quot;:&quot;n8n-nodes-base.httpRequest&quot;,&quot;position&quot;:[120,-20],&quot;parameters&quot;:{&quot;url&quot;:&quot;https://api.line.me/v2/bot/chat/loading/start&quot;,&quot;method&quot;:&quot;POST&quot;,&quot;options&quot;:{},&quot;jsonBody&quot;:&quot;={\n    \&quot;chatId\&quot;: \&quot;{{ $json.body.events[0].source.userId }}\&quot;,\n    \&quot;loadingSeconds\&quot;: 60\n}&quot;,&quot;sendBody&quot;:true,&quot;specifyBody&quot;:&quot;json&quot;,&quot;authentication&quot;:&quot;genericCredentialType&quot;,&quot;genericAuthType&quot;:&quot;httpHeaderAuth&quot;},&quot;credentials&quot;:{&quot;httpHeaderAuth&quot;:{&quot;id&quot;:&quot;3IEOzxKOUr6OEXyU&quot;,&quot;name&quot;:&quot;Line @405jtfqs LazyChinese&quot;}},&quot;typeVersion&quot;:4.2},{&quot;id&quot;:&quot;7e4cc2a0-958c-4111-909c-fba75a428d5e&quot;,&quot;name&quot;:&quot;Sticky Note1&quot;,&quot;type&quot;:&quot;n8n-nodes-base.stickyNote&quot;,&quot;position&quot;:[-380,-100],&quot;parameters&quot;:{&quot;color&quot;:4,&quot;width&quot;:360,&quot;height&quot;:560,&quot;content&quot;:&quot;**Webhook from Line**\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nYou need to set-up this webhook at Line Manager or Line Developer Console\n\nYou'll need to copy Webhook URL from this node to put in Line Console\n\nAlso, don't forget to remove 'test' part when going for production\n\nhttps://developers.line.biz/en/docs/messaging-api/receiving-messages/\n&quot;},&quot;typeVersion&quot;:1},{&quot;id&quot;:&quot;767827b2-fbca-4dbb-b392-749c25a56c93&quot;,&quot;name&quot;:&quot;Sticky Note2&quot;,&quot;type&quot;:&quot;n8n-nodes-base.stickyNote&quot;,&quot;position&quot;:[0,-100],&quot;parameters&quot;:{&quot;color&quot;:4,&quot;width&quot;:360,&quot;height&quot;:560,&quot;content&quot;:&quot;**Line Loading Animation**\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThis node is to only give ... loading animation back in Line.\n\nIt seems stupid but it actually tells user that the workflow is running and you are not left waiting without hope\n\nTo authorize, you can fill in the Line Token in the node here, or you can you header authorization (shown at the 'reply message' node)\n\nhttps://developers.line.biz/en/docs/messaging-api/use-loading-indicator/&quot;},&quot;typeVersion&quot;:1},{&quot;id&quot;:&quot;8cdafc15-3bf8-45e9-8081-901d5c5a7880&quot;,&quot;name&quot;:&quot;Sticky Note&quot;,&quot;type&quot;:&quot;n8n-nodes-base.stickyNote&quot;,&quot;position&quot;:[380,-100],&quot;parameters&quot;:{&quot;color&quot;:2,&quot;width&quot;:360,&quot;height&quot;:560,&quot;content&quot;:&quot;**OpenRouter.ai**\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThis is to call LLMs model at Openrouter.ai \n\nYou can use it to call ChatGPT, Lllama, Qwen, Deepseek, and much more with just standardized API call and top-up only once\n\nhttps://openrouter.ai/docs/quickstart&quot;},&quot;typeVersion&quot;:1},{&quot;id&quot;:&quot;3e2f4acf-771c-4d55-a13e-b4c874136574&quot;,&quot;name&quot;:&quot;Sticky Note3&quot;,&quot;type&quot;:&quot;n8n-nodes-base.stickyNote&quot;,&quot;position&quot;:[760,-100],&quot;parameters&quot;:{&quot;color&quot;:4,&quot;width&quot;:360,&quot;height&quot;:560,&quot;content&quot;:&quot;**Line Reply**\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThis node is to send reply message via Line\n\nhttps://developers.line.biz/en/docs/messaging-api/sending-messages/\n&quot;},&quot;typeVersion&quot;:1},{&quot;id&quot;:&quot;b17eddaf-da3e-4e21-ab33-9e71f385d734&quot;,&quot;name&quot;:&quot;Sticky Note4&quot;,&quot;type&quot;:&quot;n8n-nodes-base.stickyNote&quot;,&quot;position&quot;:[-380,-200],&quot;parameters&quot;:{&quot;color&quot;:5,&quot;width&quot;:780,&quot;height&quot;:80,&quot;content&quot;:&quot;## You can test this workflow by adding Line @405jtfqs&quot;},&quot;typeVersion&quot;:1}],&quot;active&quot;:true,&quot;pinData&quot;:{},&quot;settings&quot;:{&quot;timezone&quot;:&quot;Asia/Bangkok&quot;,&quot;callerPolicy&quot;:&quot;workflowsFromSameOwner&quot;,&quot;errorWorkflow&quot;:&quot;A8HoJ5iCrAMPbsLh&quot;,&quot;executionOrder&quot;:&quot;v1&quot;},&quot;versionId&quot;:&quot;aba1f2dc-81ea-4144-b88e-5fd37ee6b247&quot;,&quot;connections&quot;:{&quot;Line Webhook&quot;:{&quot;main&quot;:[[{&quot;node&quot;:&quot;Line Loading Animation&quot;,&quot;type&quot;:&quot;main&quot;,&quot;index&quot;:0}]]},&quot;Use OpenRouter&quot;:{&quot;main&quot;:[[{&quot;node&quot;:&quot;Line Reply&quot;,&quot;type&quot;:&quot;main&quot;,&quot;index&quot;:0}]]},&quot;Line Loading Animation&quot;:{&quot;main&quot;:[[{&quot;node&quot;:&quot;Use OpenRouter&quot;,&quot;type&quot;:&quot;main&quot;,&quot;index&quot;:0}]]}}}"
+        collapseformobile="false"
+        clicktointeract="true"
+        hidecanvaserrors="true"
+        theme="light"
+    ></n8n-demo>
+
+</body>
+
+</html>
