@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Command Center - Light Theme</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            /* Light Theme Colors */
+            --primary-light: #ffffff;
+            --secondary-light: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-light: #e5e7eb;
+            --border-medium: #d1d5db;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-blue: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            --gradient-green: linear-gradient(135deg, #10b981, #059669);
+            --gradient-orange: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .command-center {
+            position: relative;
+            min-height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        /* Pulse Header */
+        .pulse-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        /* Main Content */
+        .insight-layers {
+            padding: 2rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        .chapter-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        .chapter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-blue);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chapter-section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .chapter-section:hover::before {
+            opacity: 1;
+        }
+
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .chapter-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .chapter-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .chapter-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            opacity: 0.2;
+            line-height: 1;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--primary-light);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        .metric-card:hover {
+            background: var(--secondary-light);
+            transform: scale(1.02);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .metric-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .metric-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        .metric-change.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-orange);
+        }
+
+        /* Charts Container - Fixed Overflow */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--primary-light);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-wrapper {
+            height: 300px;
+            width: 100%;
+            position: relative;
+        }
+
+        .chart-canvas {
+            height: 100% !important;
+            width: 100% !important;
+            max-height: 300px;
+            max-width: 100%;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Insights Panel */
+        .insights-panel {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));
+            border: 1px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .insights-icon {
+            font-size: 1.2rem;
+        }
+
+        .insights-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .insights-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-stat {
+            text-align: center;
+        }
+
+        .insight-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            display: block;
+        }
+
+        .insight-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .insights-recommendation {
+            background: var(--primary-light);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .recommendation-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .recommendation-text strong {
+            color: var(--accent-blue);
+        }
+
+        /* Warning Panel */
+        .warning-panel {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(239, 68, 68, 0.05));
+            border: 1px solid var(--accent-orange);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .warning-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-orange);
+        }
+
+        /* Optimization Panel */
+        .optimization-panel {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05));
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .optimization-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .optimization-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .pulse-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .insight-layers {
+                padding: 1rem;
+            }
+
+            .chapter-section {
+                padding: 1.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="command-center">
+        <!-- Pulse Header -->
+        <div class="pulse-header">
+            <div>
+                <h1 class="header-title">Financial Command Center</h1>
+                <div class="live-status">
+                    <div class="status-dot"></div>
+                    <span>Live Data Stream</span>
+                </div>
+            </div>
+            <div class="live-status">
+                <span>Last Updated: 14/06/2025 15:32</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="insight-layers">
+            <!-- Chương 1: Tăng Trưởng Tài Khoản Mở Mới -->
+            <div class="chapter-section fade-in">
+                <div class="chapter-header">
+                    <div>
+                        <h2 class="chapter-title">Tăng Trưởng Tài Khoản Mở Mới</h2>
+                        <p class="chapter-subtitle">Theo dõi quy mô và phân loại tài khoản mở mới để kiểm soát tăng trưởng đầu vào</p>
+                    </div>
+                    <div class="chapter-number">01</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">15,420</span>
+                        <div class="metric-label">Tổng Tài Khoản Mới</div>
+                        <span class="metric-change positive">+12.5% so với tháng trước</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">12.5%</span>
+                        <div class="metric-label">Tăng Trưởng Hàng Tháng</div>
+                        <span class="metric-change positive">Đạt mục tiêu</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">85.3%</span>
+                        <div class="metric-label">Tỷ Lệ KYC Hoàn Tất</div>
+                        <span class="metric-change warning">Cần cải thiện</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">Referral</span>
+                        <div class="metric-label">Kênh Hiệu Quả Nhất</div>
+                        <span class="metric-change positive">42.3% conversion</span>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Xu Hướng Tài Khoản Mở Mới Theo Thời Gian</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="growthChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Phân Bổ Theo Kênh Marketing</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="channelChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Phân Loại Nhóm Khách Hàng</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="customerChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insights-panel">
+                    <div class="insights-header">
+                        <span class="insights-icon">💡</span>
+                        <h3 class="insights-title">Insights Chương 1</h3>
+                    </div>
+                    <div class="insights-stats">
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">15,420</span>
+                            <div class="insight-stat-label">Tài khoản mới</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">85.3%</span>
+                            <div class="insight-stat-label">Hoàn tất KYC</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">6</span>
+                            <div class="insight-stat-label">Kênh marketing</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">8</span>
+                            <div class="insight-stat-label">Khu vực</div>
+                        </div>
+                    </div>
+                    <div class="insights-recommendation">
+                        <p class="recommendation-text"><strong>Khuyến nghị:</strong> Tập trung đầu tư vào kênh Referral và Telesales. Cải thiện quy trình KYC để tăng tỷ lệ hoàn tất lên 90%.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chương 2: Chất Lượng Khách Mở Mới -->
+            <div class="chapter-section slide-in-left">
+                <div class="chapter-header">
+                    <div>
+                        <h2 class="chapter-title">Chất Lượng Khách Mở Mới</h2>
+                        <p class="chapter-subtitle">Đo lường hành vi thực sự của khách sau khi mở tài khoản</p>
+                    </div>
+                    <div class="chapter-number">02</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">28.7%</span>
+                        <div class="metric-label">Tỷ Lệ Giao Dịch Lần Đầu</div>
+                        <span class="metric-change positive">+3.2% so với tháng trước</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">8.2</span>
+                        <div class="metric-label">Thời Gian Đến Giao Dịch Đầu (ngày)</div>
+                        <span class="metric-change warning">Cần rút ngắn</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">18.5M</span>
+                        <div class="metric-label">Giá Trị Giao Dịch TB</div>
+                        <span class="metric-change positive">Tăng 15%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">71.3%</span>
+                        <div class="metric-label">Tỷ Lệ Không Giao Dịch</div>
+                        <span class="metric-change warning">Cần can thiệp</span>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Funnel Chuyển Đổi Khách Hàng</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="funnelChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Thời Gian Đến Giao Dịch Đầu Tiên</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="timeChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Retention Rate Theo Thời Gian</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="retentionChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-panel">
+                    <div class="warning-header">
+                        <span class="insights-icon">⚠️</span>
+                        <h3 class="warning-title">Cảnh Báo Chất Lượng</h3>
+                    </div>
+                    <div class="insights-stats">
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">71.3%</span>
+                            <div class="insight-stat-label">Không giao dịch</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">8.2</span>
+                            <div class="insight-stat-label">Ngày TB đến GD</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">72.1%</span>
+                            <div class="insight-stat-label">Retention 30d</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">18.5M</span>
+                            <div class="insight-stat-label">Giá trị TB</div>
+                        </div>
+                    </div>
+                    <div class="insights-recommendation">
+                        <p class="recommendation-text"><strong>Hành động cần thiết:</strong> Thiết kế chương trình nurturing cho 71.3% khách chưa giao dịch. Rút ngắn thời gian onboarding xuống 5 ngày.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chương 3: Hiệu Quả Các Kênh Thu Hút Khách -->
+            <div class="chapter-section fade-in">
+                <div class="chapter-header">
+                    <div>
+                        <h2 class="chapter-title">Hiệu Quả Các Kênh Thu Hút Khách</h2>
+                        <p class="chapter-subtitle">Tối ưu chi phí và lựa chọn đúng kênh mang về khách hàng chất lượng cao</p>
+                    </div>
+                    <div class="chapter-number">03</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">1.2M</span>
+                        <div class="metric-label">CAC Trung Bình</div>
+                        <span class="metric-change positive">Giảm 8% so với Q trước</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">4.2:1</span>
+                        <div class="metric-label">LTV:CAC Ratio</div>
+                        <span class="metric-change positive">Tốt (>3:1)</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">Referral</span>
+                        <div class="metric-label">Kênh ROI Cao Nhất</div>
+                        <span class="metric-change positive">ROI 520%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">18.5B</span>
+                        <div class="metric-label">Tổng Ngân Sách Marketing</div>
+                        <span class="metric-change positive">Trong kế hoạch</span>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3 class="chart-title">So Sánh Hiệu Quả Các Kênh Marketing</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="efficiencyChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">CAC vs LTV Theo Kênh</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="cacLtvChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Conversion Rate Theo Kênh</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="conversionChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="optimization-panel">
+                    <div class="optimization-header">
+                        <span class="insights-icon">🎯</span>
+                        <h3 class="optimization-title">Tối Ưu Ngân Sách Marketing</h3>
+                    </div>
+                    <div class="insights-stats">
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">520%</span>
+                            <div class="insight-stat-label">ROI Referral</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">800K</span>
+                            <div class="insight-stat-label">CAC thấp nhất</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">42.3%</span>
+                            <div class="insight-stat-label">Conv. rate cao nhất</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">4.2:1</span>
+                            <div class="insight-stat-label">LTV:CAC ratio</div>
+                        </div>
+                    </div>
+                    <div class="insights-recommendation">
+                        <p class="recommendation-text"><strong>Khuyến nghị phân bổ:</strong> Tăng 40% ngân sách cho Referral, giảm 20% cho Facebook Ads. Tập trung Telesales vào khách VIP.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chương 4: Thời Gian Chuyển Đổi -->
+            <div class="chapter-section slide-in-left">
+                <div class="chapter-header">
+                    <div>
+                        <h2 class="chapter-title">Thời Gian Chuyển Đổi</h2>
+                        <p class="chapter-subtitle">Theo dõi độ trễ giữa các bước trong hành trình từ đăng ký đến giao dịch</p>
+                    </div>
+                    <div class="chapter-number">04</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">2.3</span>
+                        <div class="metric-label">Thời Gian Hoàn Tất KYC (ngày)</div>
+                        <span class="metric-change positive">Giảm 0.5 ngày</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">14.7%</span>
+                        <div class="metric-label">Tỷ Lệ Drop-off KYC</div>
+                        <span class="metric-change warning">Cần cải thiện</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">8.5%</span>
+                        <div class="metric-label">Chuyển Đổi 24h</div>
+                        <span class="metric-change positive">Khách "nóng"</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">20.7%</span>
+                        <div class="metric-label">Hoàn Tất Onboarding</div>
+                        <span class="metric-change positive">End-to-end</span>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Timeline Chuyển Đổi Khách Hàng</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="timelineChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Phân Bổ Thời Gian KYC</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="kycTimeChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Tỷ Lệ Chuyển Đổi Nhanh</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="fastConversionChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="optimization-panel">
+                    <div class="optimization-header">
+                        <span class="insights-icon">⏱️</span>
+                        <h3 class="optimization-title">Tối Ưu Customer Journey</h3>
+                    </div>
+                    <div class="insights-stats">
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">2.3</span>
+                            <div class="insight-stat-label">Ngày hoàn tất KYC</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">8.5%</span>
+                            <div class="insight-stat-label">Chuyển đổi 24h</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">14.7%</span>
+                            <div class="insight-stat-label">Drop-off KYC</div>
+                        </div>
+                        <div class="insight-stat">
+                            <span class="insight-stat-value">20.7%</span>
+                            <div class="insight-stat-label">Hoàn tất toàn trình</div>
+                        </div>
+                    </div>
+                    <div class="insights-recommendation">
+                        <p class="recommendation-text"><strong>Cải thiện quy trình:</strong> Giảm drop-off KYC xuống 10% bằng cách đơn giản hóa UI. Tăng tỷ lệ chuyển đổi nhanh lên 12% qua automation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize GSAP animations
+        gsap.registerPlugin();
+
+        // Animate sections on scroll
+        gsap.utils.toArray('.chapter-section').forEach((section, i) => {
+            gsap.fromTo(section, 
+                { opacity: 0, y: 50 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.8, 
+                    delay: i * 0.2,
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none reverse"
+                    }
+                }
+            );
+        });
+
+        // Animate metric cards
+        gsap.utils.toArray('.metric-card').forEach((card, i) => {
+            gsap.fromTo(card,
+                { opacity: 0, scale: 0.8 },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.6,
+                    delay: i * 0.1,
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
+                }
+            );
+        });
+
+        // Chart configuration for light theme
+        const lightChartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#1f2937',
+                        font: {
+                            family: 'Inter',
+                            size: 12
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { 
+                        color: '#6b7280',
+                        font: {
+                            family: 'Inter'
+                        }
+                    },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                },
+                y: {
+                    ticks: { 
+                        color: '#6b7280',
+                        font: {
+                            family: 'Inter'
+                        }
+                    },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                }
+            }
+        };
+
+        // Initialize charts when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Growth Chart
+            const growthCtx = document.getElementById('growthChart');
+            if (growthCtx) {
+                new Chart(growthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+                        datasets: [{
+                            label: 'Tài khoản mới',
+                            data: [12000, 13500, 14200, 15420, 16800, 18200],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // Channel Chart
+            const channelCtx = document.getElementById('channelChart');
+            if (channelCtx) {
+                new Chart(channelCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Referral', 'Telesales', 'Facebook', 'Google', 'Email', 'Other'],
+                        datasets: [{
+                            data: [42.3, 25.1, 15.2, 8.7, 5.4, 3.3],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6',
+                                '#6b7280'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        ...lightChartConfig,
+                        plugins: {
+                            ...lightChartConfig.plugins,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#1f2937',
+                                    padding: 20,
+                                    font: {
+                                        family: 'Inter'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Customer Segmentation Chart (Phân Loại Nhóm Khách Hàng)
+            const customerCtx = document.getElementById('customerChart');
+            if (customerCtx) {
+                new Chart(customerCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['VIP', 'Premium', 'Standard', 'Basic', 'Trial'],
+                        datasets: [{
+                            label: 'Số lượng khách hàng',
+                            data: [1250, 3200, 5800, 4170, 1000],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6'
+                            ],
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // Funnel Chart (Chuyển đổi khách hàng)
+            const funnelCtx = document.getElementById('funnelChart');
+            if (funnelCtx) {
+                new Chart(funnelCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Đăng ký', 'Hoàn tất KYC', 'Giao dịch đầu', 'Retention 30d'],
+                        datasets: [{
+                            label: 'Số lượng khách hàng',
+                            data: [15420, 13153, 4425, 3188],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...lightChartConfig,
+                        indexAxis: 'y'
+                    }
+                });
+            }
+
+            // Time to First Transaction Chart
+            const timeCtx = document.getElementById('timeChart');
+            if (timeCtx) {
+                new Chart(timeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ngày 1', 'Ngày 2', 'Ngày 3', 'Ngày 5', 'Ngày 7', 'Ngày 14', 'Ngày 30+'],
+                        datasets: [{
+                            label: 'Tỷ lệ giao dịch (%)',
+                            data: [8.5, 15.2, 21.8, 28.7, 35.4, 42.1, 45.3],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3,
+                            fill: true
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // Retention Rate Chart
+            const retentionCtx = document.getElementById('retentionChart');
+            if (retentionCtx) {
+                new Chart(retentionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tháng 2', 'Tháng 3', 'Tháng 6'],
+                        datasets: [{
+                            label: 'Retention Rate (%)',
+                            data: [85.3, 78.2, 72.1, 68.5, 62.3, 58.7, 52.4],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3,
+                            fill: true
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // Marketing Channel Efficiency Chart
+            const efficiencyCtx = document.getElementById('efficiencyChart');
+            if (efficiencyCtx) {
+                new Chart(efficiencyCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['ROI', 'Conversion Rate', 'CAC', 'LTV', 'Volume', 'Quality'],
+                        datasets: [
+                            {
+                                label: 'Referral',
+                                data: [95, 85, 90, 88, 65, 92],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Telesales',
+                                data: [75, 70, 65, 75, 85, 80],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Facebook Ads',
+                                data: [55, 45, 40, 50, 90, 45],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        ...lightChartConfig,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    color: '#6b7280'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // CAC vs LTV Chart
+            const cacLtvCtx = document.getElementById('cacLtvChart');
+            if (cacLtvCtx) {
+                new Chart(cacLtvCtx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Referral',
+                                data: [{x: 800, y: 3360}],
+                                backgroundColor: '#3b82f6',
+                                borderColor: '#3b82f6',
+                                pointRadius: 8
+                            },
+                            {
+                                label: 'Telesales',
+                                data: [{x: 1200, y: 4200}],
+                                backgroundColor: '#10b981',
+                                borderColor: '#10b981',
+                                pointRadius: 8
+                            },
+                            {
+                                label: 'Facebook',
+                                data: [{x: 1800, y: 2800}],
+                                backgroundColor: '#f59e0b',
+                                borderColor: '#f59e0b',
+                                pointRadius: 8
+                            },
+                            {
+                                label: 'Google',
+                                data: [{x: 2200, y: 3100}],
+                                backgroundColor: '#ef4444',
+                                borderColor: '#ef4444',
+                                pointRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        ...lightChartConfig,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'CAC (K VND)',
+                                    color: '#1f2937'
+                                },
+                                ticks: { 
+                                    color: '#6b7280'
+                                },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'LTV (K VND)',
+                                    color: '#1f2937'
+                                },
+                                ticks: { 
+                                    color: '#6b7280'
+                                },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Conversion Rate by Channel Chart
+            const conversionCtx = document.getElementById('conversionChart');
+            if (conversionCtx) {
+                new Chart(conversionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Referral', 'Telesales', 'Email', 'Google', 'Facebook', 'Other'],
+                        datasets: [{
+                            label: 'Conversion Rate (%)',
+                            data: [42.3, 25.1, 18.7, 15.2, 8.7, 5.4],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#10b981',
+                                '#8b5cf6',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#6b7280'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // Timeline Conversion Chart
+            const timelineCtx = document.getElementById('timelineChart');
+            if (timelineCtx) {
+                new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Đăng ký', 'Xác thực', 'KYC', 'Nạp tiền', 'Giao dịch đầu', 'Retention'],
+                        datasets: [{
+                            label: 'Tỷ lệ hoàn thành (%)',
+                            data: [100, 92.3, 85.3, 45.2, 28.7, 20.7],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3,
+                            fill: true
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+
+            // KYC Time Distribution Chart
+            const kycTimeCtx = document.getElementById('kycTimeChart');
+            if (kycTimeCtx) {
+                new Chart(kycTimeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['< 1 ngày', '1-2 ngày', '2-3 ngày', '3-5 ngày', '> 5 ngày'],
+                        datasets: [{
+                            data: [25.3, 35.7, 22.1, 12.2, 4.7],
+                            backgroundColor: [
+                                '#10b981',
+                                '#3b82f6',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#6b7280'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        ...lightChartConfig,
+                        plugins: {
+                            ...lightChartConfig.plugins,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#1f2937',
+                                    padding: 15,
+                                    font: {
+                                        family: 'Inter'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Fast Conversion Chart
+            const fastConversionCtx = document.getElementById('fastConversionChart');
+            if (fastConversionCtx) {
+                new Chart(fastConversionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['24h', '48h', '72h', '1 tuần', '2 tuần', '1 tháng'],
+                        datasets: [{
+                            label: 'Tỷ lệ chuyển đổi (%)',
+                            data: [8.5, 15.2, 19.8, 24.3, 26.7, 28.7],
+                            backgroundColor: [
+                                '#10b981',
+                                '#3b82f6',
+                                '#8b5cf6',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#6b7280'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: lightChartConfig
+                });
+            }
+        });
+
+        // Add interactive hover effects
+        document.querySelectorAll('.metric-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                gsap.to(this, { scale: 1.05, duration: 0.3 });
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                gsap.to(this, { scale: 1, duration: 0.3 });
+            });
+        });
+
+        // Add click animations for insights panels
+        document.querySelectorAll('.insights-panel, .warning-panel, .optimization-panel').forEach(panel => {
+            panel.addEventListener('click', function() {
+                gsap.to(this, { 
+                    scale: 0.98, 
+                    duration: 0.1,
+                    yoyo: true,
+                    repeat: 1
+                });
+            });
+        });
+    </script>
+</body>
+</html>
