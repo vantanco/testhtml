@@ -1,0 +1,23 @@
+{
+  "name": "dashboard-project",
+  "version": "1.0.0",
+  "description": "Dashboard project with multiple HTML files for business analytics",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -c-1 --cors",
+    "start": "npx http-server . -p 3000 -c-1 --cors",
+    "build": "echo 'No build step needed for static HTML project'",
+    "serve": "npx http-server . -p 8080 -c-1 --cors"
+  },
+  "keywords": [
+    "dashboard",
+    "analytics",
+    "html",
+    "static"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
