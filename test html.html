@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Test Chart UMD</title>
+
+  <!-- ⭐ CHỈ 1 FILE UMD, không ESM -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+
+  <style>
+    body{font-family:system-ui;margin:40px;text-align:center}
+    canvas{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px}
+  </style>
+</head>
+<body>
+  <h3>Biểu đồ demo</h3>
+  <canvas id="chart" width="600" height="320"></canvas>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* dữ liệu mẫu */
+  const data = {
+    labels: ['T1','T2','T3','T4','T5','T6'],
+    datasets: [{
+      label: 'Tài khoản mới',
+      data: [980,1120,1350,1180,1420,1380],
+      borderColor: '#2563eb',
+      backgroundColor: 'rgba(37,99,235,.15)',
+      tension: .4,
+      fill: true
+    }]
+  };
+
+  /* khởi tạo chart */
+  const ctx = document
+              .getElementById('chart')
+              .getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data,
+    options: {plugins:{legend:{display:false}}}
+  });
+});
+</script>
+</body>
+</html>
