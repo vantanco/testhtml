@@ -1,1359 +1,1755 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Phân Tích Kinh Doanh - Giám Đốc</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        :root {
-            --primary-blue: #2563eb;
-            --success-green: #10b981;
-            --warning-yellow: #f59e0b;
-            --danger-red: #ef4444;
-            --purple: #8b5cf6;
-            --teal: #14b8a6;
-            --orange: #f97316;
-            --pink: #ec4899;
-            --bg-light: #f8fafc;
-            --bg-dark: #0f172a;
-            --text-light: #334155;
-            --text-dark: #e2e8f0;
-            --card-light: #ffffff;
-            --card-dark: #1e293b;
-            --border-light: #e2e8f0;
-            --border-dark: #334155;
-        }
+      :root {
+        --primary-blue: #2563eb;
+        --success-green: #10b981;
+        --warning-yellow: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #8b5cf6;
+        --teal: #14b8a6;
+        --orange: #f97316;
+        --pink: #ec4899;
+        --bg-light: #f8fafc;
+        --bg-dark: #0f172a;
+        --text-light: #334155;
+        --text-dark: #e2e8f0;
+        --card-light: #ffffff;
+        --card-dark: #1e293b;
+        --border-light: #e2e8f0;
+        --border-dark: #334155;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-light);
-            color: var(--text-light);
-            transition: all 0.3s ease;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-light);
+        color: var(--text-light);
+        transition: all 0.3s ease;
+      }
 
-        body.dark-theme {
-            background: var(--bg-dark);
-            color: var(--text-dark);
-        }
+      body.dark-theme {
+        background: var(--bg-dark);
+        color: var(--text-dark);
+      }
 
-        .header {
-            background: linear-gradient(135deg, var(--primary-blue), var(--purple));
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+      .header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--purple));
+        color: white;
+        padding: 1rem 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
 
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .header-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .theme-toggle {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .filters {
+        background: var(--card-light);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-light);
+        transition: all 0.3s ease;
+      }
+
+      .dark-theme .filters {
+        background: var(--card-dark);
+        border-color: var(--border-dark);
+      }
+
+      .filter-container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .filter-group select {
+        padding: 0.5rem;
+        border: 2px solid var(--border-light);
+        border-radius: 8px;
+        background: var(--card-light);
+        color: var(--text-light);
+        transition: all 0.3s ease;
+      }
+
+      .dark-theme .filter-group select {
+        background: var(--card-dark);
+        color: var(--text-dark);
+        border-color: var(--border-dark);
+      }
+
+      .filter-group select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+      }
+
+      .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .chapter {
+        margin-bottom: 3rem;
+      }
+
+      .chapter-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-blue), var(--teal));
+        color: white;
+        border-radius: 12px;
+      }
+
+      .chapter-icon {
+        font-size: 2rem;
+      }
+
+      .chapter-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .chapter-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: var(--card-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-blue);
+      }
+
+      .dark-theme .metric-card {
+        background: var(--card-dark);
+      }
+
+      .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .metric-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+
+      .dark-theme .metric-title {
+        color: var(--text-dark);
+      }
+
+      .metric-icon {
+        font-size: 1.2rem;
+        color: var(--primary-blue);
+      }
+
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-change {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .metric-change.positive {
+        color: var(--success-green);
+      }
+
+      .metric-change.negative {
+        color: var(--danger-red);
+      }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .chart-container {
+        background: var(--card-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .dark-theme .chart-container {
+        background: var(--card-dark);
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .chart-canvas {
+        position: relative;
+        height: 300px;
+      }
+
+      .large-chart {
+        grid-column: 1 / -1;
+      }
+
+      .large-chart .chart-canvas {
+        height: 400px;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+      }
+
+      .status-good {
+        background-color: var(--success-green);
+      }
+      .status-warning {
+        background-color: var(--warning-yellow);
+      }
+      .status-danger {
+        background-color: var(--danger-red);
+      }
+      .status-info {
+        background-color: var(--primary-blue);
+      }
+
+      .funnel-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .funnel-step {
+        background: linear-gradient(135deg, var(--primary-blue), var(--purple));
+        color: white;
+        padding: 1rem 2rem;
+        margin: 0 0.5rem;
+        border-radius: 8px;
+        text-align: center;
+        position: relative;
+        min-width: 150px;
+      }
+
+      .funnel-step::after {
+        content: "";
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 15px solid var(--primary-blue);
+        border-top: 25px solid transparent;
+        border-bottom: 25px solid transparent;
+      }
+
+      .funnel-step:last-child::after {
+        display: none;
+      }
+
+      .funnel-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .funnel-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      .insight-box {
+        background: linear-gradient(135deg, var(--success-green), var(--teal));
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+      }
+
+      .insight-title {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      .kpi-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+      }
+
+      .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .kpi-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      @media (max-width: 768px) {
         .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .theme-toggle {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 0.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .filters {
-            background: var(--card-light);
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--border-light);
-            transition: all 0.3s ease;
-        }
-
-        .dark-theme .filters {
-            background: var(--card-dark);
-            border-color: var(--border-dark);
+          flex-direction: column;
+          gap: 1rem;
         }
 
         .filter-container {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .filter-group select {
-            padding: 0.5rem;
-            border: 2px solid var(--border-light);
-            border-radius: 8px;
-            background: var(--card-light);
-            color: var(--text-light);
-            transition: all 0.3s ease;
-        }
-
-        .dark-theme .filter-group select {
-            background: var(--card-dark);
-            color: var(--text-dark);
-            border-color: var(--border-dark);
-        }
-
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--primary-blue);
+          flex-direction: column;
         }
 
         .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .chapter {
-            margin-bottom: 3rem;
-        }
-
-        .chapter-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary-blue), var(--teal));
-            color: white;
-            border-radius: 12px;
-        }
-
-        .chapter-icon {
-            font-size: 2rem;
-        }
-
-        .chapter-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .chapter-description {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .metric-card {
-            background: var(--card-light);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .dark-theme .metric-card {
-            background: var(--card-dark);
-        }
-
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
-        }
-
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .metric-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        .dark-theme .metric-title {
-            color: var(--text-dark);
-        }
-
-        .metric-icon {
-            font-size: 1.2rem;
-            color: var(--primary-blue);
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .metric-change {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .metric-change.positive {
-            color: var(--success-green);
-        }
-
-        .metric-change.negative {
-            color: var(--danger-red);
+          padding: 1rem;
         }
 
         .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
+          grid-template-columns: 1fr;
         }
-
-        .chart-container {
-            background: var(--card-light);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .dark-theme .chart-container {
-            background: var(--card-dark);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .chart-canvas {
-            position: relative;
-            height: 300px;
-        }
-
-        .large-chart {
-            grid-column: 1 / -1;
-        }
-
-        .large-chart .chart-canvas {
-            height: 400px;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 0.5rem;
-        }
-
-        .status-good { background-color: var(--success-green); }
-        .status-warning { background-color: var(--warning-yellow); }
-        .status-danger { background-color: var(--danger-red); }
-        .status-info { background-color: var(--primary-blue); }
 
         .funnel-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+          flex-direction: column;
         }
 
         .funnel-step {
-            background: linear-gradient(135deg, var(--primary-blue), var(--purple));
-            color: white;
-            padding: 1rem 2rem;
-            margin: 0 0.5rem;
-            border-radius: 8px;
-            text-align: center;
-            position: relative;
-            min-width: 150px;
+          margin: 0.5rem 0;
+          width: 100%;
         }
 
         .funnel-step::after {
-            content: '';
-            position: absolute;
-            right: -15px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid var(--primary-blue);
-            border-top: 25px solid transparent;
-            border-bottom: 25px solid transparent;
+          display: none;
         }
+      }
 
-        .funnel-step:last-child::after {
-            display: none;
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .spinner {
+        border: 4px solid var(--border-light);
+        border-top: 4px solid var(--primary-blue);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-
-        .funnel-value {
-            font-size: 1.5rem;
-            font-weight: 700;
+        100% {
+          transform: rotate(360deg);
         }
+      }
 
-        .funnel-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
+      .export-btn {
+        background: var(--success-green);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
 
-        .insight-box {
-            background: linear-gradient(135deg, var(--success-green), var(--teal));
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-        }
-
-        .insight-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .kpi-item {
-            text-align: center;
-            padding: 1rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-
-        .kpi-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .filter-container {
-                flex-direction: column;
-            }
-
-            .main-container {
-                padding: 1rem;
-            }
-
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .funnel-container {
-                flex-direction: column;
-            }
-
-            .funnel-step {
-                margin: 0.5rem 0;
-                width: 100%;
-            }
-
-            .funnel-step::after {
-                display: none;
-            }
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            border: 4px solid var(--border-light);
-            border-top: 4px solid var(--primary-blue);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .export-btn {
-            background: var(--success-green);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            background: var(--teal);
-        }
+      .export-btn:hover {
+        background: var(--teal);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header class="header">
-        <div class="header-content">
-            <div>
-                <h1><i class="fas fa-chart-line"></i> Dashboard Phân Tích Kinh Doanh</h1>
-                <p>Giám Đốc Kinh Doanh - Báo Cáo Tổng Hợp</p>
-            </div>
-            <div class="header-controls">
-                <span id="lastUpdate">Cập nhật: 14/06/2025 14:48</span>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
+      <div class="header-content">
+        <div>
+          <h1>
+            <i class="fas fa-chart-line"></i> Dashboard Phân Tích Kinh Doanh
+          </h1>
+          <p>Giám Đốc Kinh Doanh - Báo Cáo Tổng Hợp</p>
         </div>
+        <div class="header-controls">
+          <span id="lastUpdate">Cập nhật: 14/06/2025 14:48</span>
+          <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
     </header>
 
     <div class="filters">
-        <div class="filter-container">
-            <div class="filter-group">
-                <label>Thời gian</label>
-                <select id="timeFilter">
-                    <option value="12">12 tháng qua</option>
-                    <option value="6">6 tháng qua</option>
-                    <option value="3">3 tháng qua</option>
-                    <option value="1">Tháng này</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Kênh Marketing</label>
-                <select id="channelFilter">
-                    <option value="all">Tất cả kênh</option>
-                    <option value="google">Google Ads</option>
-                    <option value="facebook">Facebook Ads</option>
-                    <option value="telesales">Telesales</option>
-                    <option value="referral">Referral</option>
-                    <option value="organic">Organic</option>
-                    <option value="partner">Partner</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Khu vực</label>
-                <select id="regionFilter">
-                    <option value="all">Toàn quốc</option>
-                    <option value="hanoi">Hà Nội</option>
-                    <option value="hcm">TP.HCM</option>
-                    <option value="danang">Đà Nẵng</option>
-                    <option value="cantho">Cần Thơ</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Nhóm khách hàng</label>
-                <select id="customerFilter">
-                    <option value="all">Tất cả</option>
-                    <option value="retail">Retail</option>
-                    <option value="vip">VIP</option>
-                    <option value="sme">SME</option>
-                    <option value="corporate">Corporate</option>
-                </select>
-            </div>
+      <div class="filter-container">
+        <div class="filter-group">
+          <label>Thời gian</label>
+          <select id="timeFilter">
+            <option value="12">12 tháng qua</option>
+            <option value="6">6 tháng qua</option>
+            <option value="3">3 tháng qua</option>
+            <option value="1">Tháng này</option>
+          </select>
         </div>
+        <div class="filter-group">
+          <label>Kênh Marketing</label>
+          <select id="channelFilter">
+            <option value="all">Tất cả kênh</option>
+            <option value="google">Google Ads</option>
+            <option value="facebook">Facebook Ads</option>
+            <option value="telesales">Telesales</option>
+            <option value="referral">Referral</option>
+            <option value="organic">Organic</option>
+            <option value="partner">Partner</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Khu vực</label>
+          <select id="regionFilter">
+            <option value="all">Toàn quốc</option>
+            <option value="hanoi">Hà Nội</option>
+            <option value="hcm">TP.HCM</option>
+            <option value="danang">Đà Nẵng</option>
+            <option value="cantho">Cần Thơ</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Nhóm khách hàng</label>
+          <select id="customerFilter">
+            <option value="all">Tất cả</option>
+            <option value="retail">Retail</option>
+            <option value="vip">VIP</option>
+            <option value="sme">SME</option>
+            <option value="corporate">Corporate</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div class="main-container">
-        <!-- Chương 1: Tăng trưởng tài khoản mở mới -->
-        <div class="chapter">
-            <div class="chapter-header">
-                <i class="fas fa-chart-line chapter-icon"></i>
-                <div>
-                    <div class="chapter-title">Chương 1: Tăng Trưởng Tài Khoản Mở Mới</div>
-                    <div class="chapter-description">Theo dõi quy mô và phân loại tài khoản mở mới để kiểm soát tăng trưởng đầu vào</div>
-                </div>
+      <!-- Chương 1: Tăng trưởng tài khoản mở mới -->
+      <div class="chapter">
+        <div class="chapter-header">
+          <i class="fas fa-chart-line chapter-icon"></i>
+          <div>
+            <div class="chapter-title">
+              Chương 1: Tăng Trưởng Tài Khoản Mở Mới
             </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Tổng Tài Khoản Mới</span>
-                        <i class="fas fa-users metric-icon"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--primary-blue);">15,420</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-up"></i> +12.5% so với tháng trước
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Tăng Trưởng Hàng Tháng</span>
-                        <i class="fas fa-trending-up metric-icon"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--success-green);">12.5%</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>Đạt mục tiêu
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Tỷ Lệ KYC Hoàn Tất</span>
-                        <i class="fas fa-check-circle metric-icon"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--warning-yellow);">85.3%</div>
-                    <div class="metric-change negative">
-                        <span class="status-indicator status-warning"></span>Cần cải thiện
-                    </div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <span class="metric-title">Kênh Hiệu Quả Nhất</span>
-                        <i class="fas fa-star metric-icon"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--purple);">Referral</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>42.3% conversion
-                    </div>
-                </div>
+            <div class="chapter-description">
+              Theo dõi quy mô và phân loại tài khoản mở mới để kiểm soát tăng
+              trưởng đầu vào
             </div>
-
-            <div class="charts-grid">
-                <div class="chart-container large-chart">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Xu Hướng Tài Khoản Mở Mới Theo Thời Gian</h3>
-                        <button class="export-btn">
-                            <i class="fas fa-download"></i> Xuất
-                        </button>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="accountTrendChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Phân Bổ Theo Kênh Marketing</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="channelDistributionChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Phân Loại Nhóm Khách Hàng</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="customerSegmentChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="insight-box">
-                <div class="insight-title">💡 Insights Chương 1</div>
-                <div class="kpi-grid">
-                    <div class="kpi-item">
-                        <div class="kpi-value">15,420</div>
-                        <div class="kpi-label">Tài khoản mới</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">85.3%</div>
-                        <div class="kpi-label">Hoàn tất KYC</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">6</div>
-                        <div class="kpi-label">Kênh marketing</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">8</div>
-                        <div class="kpi-label">Khu vực</div>
-                    </div>
-                </div>
-                <p><strong>Khuyến nghị:</strong> Tập trung đầu tư vào kênh Referral và Telesales. Cải thiện quy trình KYC để tăng tỷ lệ hoàn tất lên 90%.</p>
-            </div>
+          </div>
         </div>
 
-        <!-- Chương 2: Chất lượng khách mở mới -->
-        <div class="chapter">
-            <div class="chapter-header" style="background: linear-gradient(135deg, var(--success-green), var(--teal));">
-                <i class="fas fa-user-check chapter-icon"></i>
-                <div>
-                    <div class="chapter-title">Chương 2: Chất Lượng Khách Mở Mới</div>
-                    <div class="chapter-description">Đo lường hành vi thực sự của khách sau khi mở tài khoản</div>
-                </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Tổng Tài Khoản Mới</span>
+              <i class="fas fa-users metric-icon"></i>
             </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card" style="border-left-color: var(--success-green);">
-                    <div class="metric-header">
-                        <span class="metric-title">Tỷ Lệ Giao Dịch Lần Đầu</span>
-                        <i class="fas fa-exchange-alt metric-icon" style="color: var(--success-green);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--success-green);">28.7%</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-up"></i> +3.2% so với tháng trước
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--warning-yellow);">
-                    <div class="metric-header">
-                        <span class="metric-title">Thời Gian Đến Giao Dịch Đầu</span>
-                        <i class="fas fa-clock metric-icon" style="color: var(--warning-yellow);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--warning-yellow);">8.2 ngày</div>
-                    <div class="metric-change negative">
-                        <span class="status-indicator status-warning"></span>Cần rút ngắn
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--purple);">
-                    <div class="metric-header">
-                        <span class="metric-title">Giá Trị Giao Dịch TB</span>
-                        <i class="fas fa-dollar-sign metric-icon" style="color: var(--purple);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--purple);">18.5M</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>Tăng 15%
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--danger-red);">
-                    <div class="metric-header">
-                        <span class="metric-title">Tỷ Lệ Không Giao Dịch</span>
-                        <i class="fas fa-exclamation-triangle metric-icon" style="color: var(--danger-red);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--danger-red);">71.3%</div>
-                    <div class="metric-change negative">
-                        <span class="status-indicator status-danger"></span>Cần can thiệp
-                    </div>
-                </div>
+            <div class="metric-value" style="color: var(--primary-blue)">
+              15,420
             </div>
-
-            <div class="chart-container large-chart">
-                <div class="chart-header">
-                    <h3 class="chart-title">Funnel Chuyển Đổi Khách Hàng</h3>
-                </div>
-                <div class="funnel-container">
-                    <div class="funnel-step">
-                        <div class="funnel-value">15,420</div>
-                        <div class="funnel-label">Đăng ký</div>
-                    </div>
-                    <div class="funnel-step">
-                        <div class="funnel-value">13,153</div>
-                        <div class="funnel-label">Hoàn tất KYC</div>
-                    </div>
-                    <div class="funnel-step">
-                        <div class="funnel-value">4,425</div>
-                        <div class="funnel-label">Giao dịch đầu</div>
-                    </div>
-                    <div class="funnel-step">
-                        <div class="funnel-value">3,188</div>
-                        <div class="funnel-label">Retention 30d</div>
-                    </div>
-                </div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-up"></i> +12.5% so với tháng trước
             </div>
+          </div>
 
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Thời Gian Đến Giao Dịch Đầu Tiên</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="timeToFirstTransactionChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Retention Rate Theo Thời Gian</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="retentionChart"></canvas>
-                    </div>
-                </div>
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Tăng Trưởng Hàng Tháng</span>
+              <i class="fas fa-trending-up metric-icon"></i>
             </div>
-
-            <div class="insight-box" style="background: linear-gradient(135deg, var(--warning-yellow), var(--orange));">
-                <div class="insight-title">⚠️ Cảnh Báo Chất Lượng</div>
-                <div class="kpi-grid">
-                    <div class="kpi-item">
-                        <div class="kpi-value">71.3%</div>
-                        <div class="kpi-label">Không giao dịch</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">8.2</div>
-                        <div class="kpi-label">Ngày TB đến GD</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">72.1%</div>
-                        <div class="kpi-label">Retention 30d</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">18.5M</div>
-                        <div class="kpi-label">Giá trị TB</div>
-                    </div>
-                </div>
-                <p><strong>Hành động cần thiết:</strong> Thiết kế chương trình nurturing cho 71.3% khách chưa giao dịch. Rút ngắn thời gian onboarding xuống 5 ngày.</p>
+            <div class="metric-value" style="color: var(--success-green)">
+              12.5%
             </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>Đạt mục tiêu
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Tỷ Lệ KYC Hoàn Tất</span>
+              <i class="fas fa-check-circle metric-icon"></i>
+            </div>
+            <div class="metric-value" style="color: var(--warning-yellow)">
+              85.3%
+            </div>
+            <div class="metric-change negative">
+              <span class="status-indicator status-warning"></span>Cần cải thiện
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Kênh Hiệu Quả Nhất</span>
+              <i class="fas fa-star metric-icon"></i>
+            </div>
+            <div class="metric-value" style="color: var(--purple)">
+              Referral
+            </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>42.3% conversion
+            </div>
+          </div>
         </div>
 
-        <!-- Chương 3: Hiệu quả các kênh thu hút khách -->
-        <div class="chapter">
-            <div class="chapter-header" style="background: linear-gradient(135deg, var(--orange), var(--pink));">
-                <i class="fas fa-bullhorn chapter-icon"></i>
-                <div>
-                    <div class="chapter-title">Chương 3: Hiệu Quả Các Kênh Thu Hút Khách</div>
-                    <div class="chapter-description">Tối ưu chi phí và lựa chọn đúng kênh mang về khách hàng chất lượng cao</div>
-                </div>
+        <div class="charts-grid">
+          <div class="chart-container large-chart">
+            <div class="chart-header">
+              <h3 class="chart-title">
+                Xu Hướng Tài Khoản Mở Mới Theo Thời Gian
+              </h3>
+              <button class="export-btn">
+                <i class="fas fa-download"></i> Xuất
+              </button>
             </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card" style="border-left-color: var(--orange);">
-                    <div class="metric-header">
-                        <span class="metric-title">CAC Trung Bình</span>
-                        <i class="fas fa-money-bill-wave metric-icon" style="color: var(--orange);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--orange);">1.2M</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-down"></i> Giảm 8% so với Q trước
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--success-green);">
-                    <div class="metric-header">
-                        <span class="metric-title">LTV:CAC Ratio</span>
-                        <i class="fas fa-chart-pie metric-icon" style="color: var(--success-green);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--success-green);">4.2:1</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>Tốt (>3:1)
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--primary-blue);">
-                    <div class="metric-header">
-                        <span class="metric-title">Kênh ROI Cao Nhất</span>
-                        <i class="fas fa-trophy metric-icon" style="color: var(--primary-blue);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--primary-blue);">Referral</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>ROI 520%
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--purple);">
-                    <div class="metric-header">
-                        <span class="metric-title">Tổng Ngân Sách Marketing</span>
-                        <i class="fas fa-wallet metric-icon" style="color: var(--purple);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--purple);">18.5B</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-info"></span>Trong kế hoạch
-                    </div>
-                </div>
+            <div class="chart-canvas">
+              <canvas id="accountTrendChart"></canvas>
             </div>
+          </div>
 
-            <div class="charts-grid">
-                <div class="chart-container large-chart">
-                    <div class="chart-header">
-                        <h3 class="chart-title">So Sánh Hiệu Quả Các Kênh Marketing</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="channelEffectivenessChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">CAC vs LTV Theo Kênh</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="cacLtvChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Conversion Rate Theo Kênh</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="channelConversionChart"></canvas>
-                    </div>
-                </div>
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Phân Bổ Theo Kênh Marketing</h3>
             </div>
-
-            <div class="insight-box" style="background: linear-gradient(135deg, var(--primary-blue), var(--purple));">
-                <div class="insight-title">🎯 Tối Ưu Ngân Sách Marketing</div>
-                <div class="kpi-grid">
-                    <div class="kpi-item">
-                        <div class="kpi-value">520%</div>
-                        <div class="kpi-label">ROI Referral</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">800K</div>
-                        <div class="kpi-label">CAC thấp nhất</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">42.3%</div>
-                        <div class="kpi-label">Conv. rate cao nhất</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">4.2:1</div>
-                        <div class="kpi-label">LTV:CAC ratio</div>
-                    </div>
-                </div>
-                <p><strong>Khuyến nghị phân bổ:</strong> Tăng 40% ngân sách cho Referral, giảm 20% cho Facebook Ads. Tập trung Telesales vào khách VIP.</p>
+            <div class="chart-canvas">
+              <canvas id="channelDistributionChart"></canvas>
             </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Phân Loại Nhóm Khách Hàng</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="customerSegmentChart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <!-- Chương 4: Thời gian chuyển đổi -->
-        <div class="chapter">
-            <div class="chapter-header" style="background: linear-gradient(135deg, var(--teal), var(--success-green));">
-                <i class="fas fa-stopwatch chapter-icon"></i>
-                <div>
-                    <div class="chapter-title">Chương 4: Thời Gian Chuyển Đổi</div>
-                    <div class="chapter-description">Theo dõi độ trễ giữa các bước trong hành trình từ đăng ký đến giao dịch</div>
-                </div>
+        <div class="insight-box">
+          <div class="insight-title">💡 Insights Chương 1</div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-value">15,420</div>
+              <div class="kpi-label">Tài khoản mới</div>
             </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card" style="border-left-color: var(--teal);">
-                    <div class="metric-header">
-                        <span class="metric-title">Thời Gian Hoàn Tất KYC</span>
-                        <i class="fas fa-id-card metric-icon" style="color: var(--teal);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--teal);">2.3 ngày</div>
-                    <div class="metric-change positive">
-                        <i class="fas fa-arrow-down"></i> Giảm 0.5 ngày
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--warning-yellow);">
-                    <div class="metric-header">
-                        <span class="metric-title">Tỷ Lệ Drop-off KYC</span>
-                        <i class="fas fa-user-times metric-icon" style="color: var(--warning-yellow);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--warning-yellow);">14.7%</div>
-                    <div class="metric-change negative">
-                        <span class="status-indicator status-warning"></span>Cần cải thiện
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--success-green);">
-                    <div class="metric-header">
-                        <span class="metric-title">Chuyển Đổi 24h</span>
-                        <i class="fas fa-rocket metric-icon" style="color: var(--success-green);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--success-green);">8.5%</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-good"></span>Khách "nóng"
-                    </div>
-                </div>
-
-                <div class="metric-card" style="border-left-color: var(--primary-blue);">
-                    <div class="metric-header">
-                        <span class="metric-title">Hoàn Tất Onboarding</span>
-                        <i class="fas fa-check-double metric-icon" style="color: var(--primary-blue);"></i>
-                    </div>
-                    <div class="metric-value" style="color: var(--primary-blue);">20.7%</div>
-                    <div class="metric-change positive">
-                        <span class="status-indicator status-info"></span>End-to-end
-                    </div>
-                </div>
+            <div class="kpi-item">
+              <div class="kpi-value">85.3%</div>
+              <div class="kpi-label">Hoàn tất KYC</div>
             </div>
-
-            <div class="charts-grid">
-                <div class="chart-container large-chart">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Timeline Chuyển Đổi Khách Hàng</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="conversionTimelineChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Phân Bổ Thời Gian KYC</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="kycTimeDistributionChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Tỷ Lệ Chuyển Đổi Nhanh</h3>
-                    </div>
-                    <div class="chart-canvas">
-                        <canvas id="fastConversionChart"></canvas>
-                    </div>
-                </div>
+            <div class="kpi-item">
+              <div class="kpi-value">6</div>
+              <div class="kpi-label">Kênh marketing</div>
             </div>
-
-            <div class="insight-box" style="background: linear-gradient(135deg, var(--teal), var(--primary-blue));">
-                <div class="insight-title">⏱️ Tối Ưu Customer Journey</div>
-                <div class="kpi-grid">
-                    <div class="kpi-item">
-                        <div class="kpi-value">2.3</div>
-                        <div class="kpi-label">Ngày hoàn tất KYC</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">8.5%</div>
-                        <div class="kpi-label">Chuyển đổi 24h</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">14.7%</div>
-                        <div class="kpi-label">Drop-off KYC</div>
-                    </div>
-                    <div class="kpi-item">
-                        <div class="kpi-value">20.7%</div>
-                        <div class="kpi-label">Hoàn tất toàn trình</div>
-                    </div>
-                </div>
-                <p><strong>Cải thiện quy trình:</strong> Giảm drop-off KYC xuống 10% bằng cách đơn giản hóa UI. Tăng tỷ lệ chuyển đổi nhanh lên 12% qua automation.</p>
+            <div class="kpi-item">
+              <div class="kpi-value">8</div>
+              <div class="kpi-label">Khu vực</div>
             </div>
+          </div>
+          <p>
+            <strong>Khuyến nghị:</strong> Tập trung đầu tư vào kênh Referral và
+            Telesales. Cải thiện quy trình KYC để tăng tỷ lệ hoàn tất lên 90%.
+          </p>
         </div>
+      </div>
+
+      <!-- Chương 2: Chất lượng khách mở mới -->
+      <div class="chapter">
+        <div
+          class="chapter-header"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--success-green),
+              var(--teal)
+            );
+          "
+        >
+          <i class="fas fa-user-check chapter-icon"></i>
+          <div>
+            <div class="chapter-title">Chương 2: Chất Lượng Khách Mở Mới</div>
+            <div class="chapter-description">
+              Đo lường hành vi thực sự của khách sau khi mở tài khoản
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div
+            class="metric-card"
+            style="border-left-color: var(--success-green)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Tỷ Lệ Giao Dịch Lần Đầu</span>
+              <i
+                class="fas fa-exchange-alt metric-icon"
+                style="color: var(--success-green)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--success-green)">
+              28.7%
+            </div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-up"></i> +3.2% so với tháng trước
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--warning-yellow)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Thời Gian Đến Giao Dịch Đầu</span>
+              <i
+                class="fas fa-clock metric-icon"
+                style="color: var(--warning-yellow)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--warning-yellow)">
+              8.2 ngày
+            </div>
+            <div class="metric-change negative">
+              <span class="status-indicator status-warning"></span>Cần rút ngắn
+            </div>
+          </div>
+
+          <div class="metric-card" style="border-left-color: var(--purple)">
+            <div class="metric-header">
+              <span class="metric-title">Giá Trị Giao Dịch TB</span>
+              <i
+                class="fas fa-dollar-sign metric-icon"
+                style="color: var(--purple)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--purple)">18.5M</div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>Tăng 15%
+            </div>
+          </div>
+
+          <div class="metric-card" style="border-left-color: var(--danger-red)">
+            <div class="metric-header">
+              <span class="metric-title">Tỷ Lệ Không Giao Dịch</span>
+              <i
+                class="fas fa-exclamation-triangle metric-icon"
+                style="color: var(--danger-red)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--danger-red)">
+              71.3%
+            </div>
+            <div class="metric-change negative">
+              <span class="status-indicator status-danger"></span>Cần can thiệp
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-container large-chart">
+          <div class="chart-header">
+            <h3 class="chart-title">Funnel Chuyển Đổi Khách Hàng</h3>
+          </div>
+          <div class="funnel-container">
+            <div class="funnel-step">
+              <div class="funnel-value">15,420</div>
+              <div class="funnel-label">Đăng ký</div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-value">13,153</div>
+              <div class="funnel-label">Hoàn tất KYC</div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-value">4,425</div>
+              <div class="funnel-label">Giao dịch đầu</div>
+            </div>
+            <div class="funnel-step">
+              <div class="funnel-value">3,188</div>
+              <div class="funnel-label">Retention 30d</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Thời Gian Đến Giao Dịch Đầu Tiên</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="timeToFirstTransactionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Retention Rate Theo Thời Gian</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="retentionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="insight-box"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--warning-yellow),
+              var(--orange)
+            );
+          "
+        >
+          <div class="insight-title">⚠️ Cảnh Báo Chất Lượng</div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-value">71.3%</div>
+              <div class="kpi-label">Không giao dịch</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">8.2</div>
+              <div class="kpi-label">Ngày TB đến GD</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">72.1%</div>
+              <div class="kpi-label">Retention 30d</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">18.5M</div>
+              <div class="kpi-label">Giá trị TB</div>
+            </div>
+          </div>
+          <p>
+            <strong>Hành động cần thiết:</strong> Thiết kế chương trình
+            nurturing cho 71.3% khách chưa giao dịch. Rút ngắn thời gian
+            onboarding xuống 5 ngày.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chương 3: Hiệu quả các kênh thu hút khách -->
+      <div class="chapter">
+        <div
+          class="chapter-header"
+          style="
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+          "
+        >
+          <i class="fas fa-bullhorn chapter-icon"></i>
+          <div>
+            <div class="chapter-title">
+              Chương 3: Hiệu Quả Các Kênh Thu Hút Khách
+            </div>
+            <div class="chapter-description">
+              Tối ưu chi phí và lựa chọn đúng kênh mang về khách hàng chất lượng
+              cao
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card" style="border-left-color: var(--orange)">
+            <div class="metric-header">
+              <span class="metric-title">CAC Trung Bình</span>
+              <i
+                class="fas fa-money-bill-wave metric-icon"
+                style="color: var(--orange)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--orange)">1.2M</div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-down"></i> Giảm 8% so với Q trước
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--success-green)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">LTV:CAC Ratio</span>
+              <i
+                class="fas fa-chart-pie metric-icon"
+                style="color: var(--success-green)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--success-green)">
+              4.2:1
+            </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>Tốt (>3:1)
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--primary-blue)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Kênh ROI Cao Nhất</span>
+              <i
+                class="fas fa-trophy metric-icon"
+                style="color: var(--primary-blue)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--primary-blue)">
+              Referral
+            </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>ROI 520%
+            </div>
+          </div>
+
+          <div class="metric-card" style="border-left-color: var(--purple)">
+            <div class="metric-header">
+              <span class="metric-title">Tổng Ngân Sách Marketing</span>
+              <i
+                class="fas fa-wallet metric-icon"
+                style="color: var(--purple)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--purple)">18.5B</div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-info"></span>Trong kế hoạch
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-container large-chart">
+            <div class="chart-header">
+              <h3 class="chart-title">So Sánh Hiệu Quả Các Kênh Marketing</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="channelEffectivenessChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">CAC vs LTV Theo Kênh</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="cacLtvChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Conversion Rate Theo Kênh</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="channelConversionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="insight-box"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--primary-blue),
+              var(--purple)
+            );
+          "
+        >
+          <div class="insight-title">🎯 Tối Ưu Ngân Sách Marketing</div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-value">520%</div>
+              <div class="kpi-label">ROI Referral</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">800K</div>
+              <div class="kpi-label">CAC thấp nhất</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">42.3%</div>
+              <div class="kpi-label">Conv. rate cao nhất</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">4.2:1</div>
+              <div class="kpi-label">LTV:CAC ratio</div>
+            </div>
+          </div>
+          <p>
+            <strong>Khuyến nghị phân bổ:</strong> Tăng 40% ngân sách cho
+            Referral, giảm 20% cho Facebook Ads. Tập trung Telesales vào khách
+            VIP.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chương 4: Thời gian chuyển đổi -->
+      <div class="chapter">
+        <div
+          class="chapter-header"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--teal),
+              var(--success-green)
+            );
+          "
+        >
+          <i class="fas fa-stopwatch chapter-icon"></i>
+          <div>
+            <div class="chapter-title">Chương 4: Thời Gian Chuyển Đổi</div>
+            <div class="chapter-description">
+              Theo dõi độ trễ giữa các bước trong hành trình từ đăng ký đến giao
+              dịch
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card" style="border-left-color: var(--teal)">
+            <div class="metric-header">
+              <span class="metric-title">Thời Gian Hoàn Tất KYC</span>
+              <i
+                class="fas fa-id-card metric-icon"
+                style="color: var(--teal)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--teal)">2.3 ngày</div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-down"></i> Giảm 0.5 ngày
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--warning-yellow)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Tỷ Lệ Drop-off KYC</span>
+              <i
+                class="fas fa-user-times metric-icon"
+                style="color: var(--warning-yellow)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--warning-yellow)">
+              14.7%
+            </div>
+            <div class="metric-change negative">
+              <span class="status-indicator status-warning"></span>Cần cải thiện
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--success-green)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Chuyển Đổi 24h</span>
+              <i
+                class="fas fa-rocket metric-icon"
+                style="color: var(--success-green)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--success-green)">
+              8.5%
+            </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-good"></span>Khách "nóng"
+            </div>
+          </div>
+
+          <div
+            class="metric-card"
+            style="border-left-color: var(--primary-blue)"
+          >
+            <div class="metric-header">
+              <span class="metric-title">Hoàn Tất Onboarding</span>
+              <i
+                class="fas fa-check-double metric-icon"
+                style="color: var(--primary-blue)"
+              ></i>
+            </div>
+            <div class="metric-value" style="color: var(--primary-blue)">
+              20.7%
+            </div>
+            <div class="metric-change positive">
+              <span class="status-indicator status-info"></span>End-to-end
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-container large-chart">
+            <div class="chart-header">
+              <h3 class="chart-title">Timeline Chuyển Đổi Khách Hàng</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="conversionTimelineChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Phân Bổ Thời Gian KYC</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="kycTimeDistributionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Tỷ Lệ Chuyển Đổi Nhanh</h3>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="fastConversionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="insight-box"
+          style="
+            background: linear-gradient(
+              135deg,
+              var(--teal),
+              var(--primary-blue)
+            );
+          "
+        >
+          <div class="insight-title">⏱️ Tối Ưu Customer Journey</div>
+          <div class="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-value">2.3</div>
+              <div class="kpi-label">Ngày hoàn tất KYC</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">8.5%</div>
+              <div class="kpi-label">Chuyển đổi 24h</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">14.7%</div>
+              <div class="kpi-label">Drop-off KYC</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-value">20.7%</div>
+              <div class="kpi-label">Hoàn tất toàn trình</div>
+            </div>
+          </div>
+          <p>
+            <strong>Cải thiện quy trình:</strong> Giảm drop-off KYC xuống 10%
+            bằng cách đơn giản hóa UI. Tăng tỷ lệ chuyển đổi nhanh lên 12% qua
+            automation.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue Analysis Section -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <div>
+          <i class="fas fa-chart-line chapter-icon"></i>
+          <div>
+            <h2 class="chapter-title">Phân Tích Doanh Thu</h2>
+            <p class="chapter-description">
+              Theo dõi xu hướng doanh thu và hiệu suất tài chính
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <!-- Revenue Trend Chart -->
+        <div class="metric-card large-chart">
+          <div class="metric-header">
+            <h3>Xu Hướng Doanh Thu</h3>
+            <p>Doanh thu theo thời gian (tỷ VND)</p>
+          </div>
+          <div class="chart-canvas">
+            <canvas id="revenueTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Revenue by Product Chart -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <h3>Doanh Thu Theo Sản Phẩm</h3>
+            <p>Phân bổ doanh thu các dòng sản phẩm</p>
+          </div>
+          <div class="chart-canvas">
+            <canvas id="revenueByProductChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Monthly Comparison Chart -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <h3>So Sánh Tháng</h3>
+            <p>So sánh doanh thu tháng hiện tại vs tháng trước</p>
+          </div>
+          <div class="chart-canvas">
+            <canvas id="monthlyComparisonChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-item">
+          <div class="kpi-value">2.8 tỷ</div>
+          <div class="kpi-label">Doanh thu tháng</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-value">+18.5%</div>
+          <div class="kpi-label">Tăng trưởng MoM</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-value">93.2 triệu</div>
+          <div class="kpi-label">Doanh thu/ngày</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-value">4.2 triệu</div>
+          <div class="kpi-label">Doanh thu/khách hàng</div>
+        </div>
+      </div>
+
+      <div class="insights-text">
+        <p>
+          <strong>Phân tích:</strong> Doanh thu tăng trưởng ổn định 18.5% so với
+          tháng trước. Sản phẩm Đầu tư chiếm 45% tổng doanh thu. Cần tập trung
+          phát triển thêm sản phẩm Bảo hiểm để đa dạng hóa nguồn thu.
+        </p>
+      </div>
     </div>
 
     <script>
-        // Dữ liệu mẫu
-        const sampleData = {
-            accountTrend: {
-                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-                datasets: [{
-                    label: 'Tài khoản mới',
-                    data: [980, 1120, 1350, 1180, 1420, 1380, 1250, 1480, 1320, 1550, 1680, 1420],
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
+      // Dữ liệu mẫu
+      const sampleData = {
+        accountTrend: {
+          labels: [
+            "T1",
+            "T2",
+            "T3",
+            "T4",
+            "T5",
+            "T6",
+            "T7",
+            "T8",
+            "T9",
+            "T10",
+            "T11",
+            "T12",
+          ],
+          datasets: [
+            {
+              label: "Tài khoản mới",
+              data: [
+                980, 1120, 1350, 1180, 1420, 1380, 1250, 1480, 1320, 1550, 1680,
+                1420,
+              ],
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.1)",
+              tension: 0.4,
+              fill: true,
             },
-            channelDistribution: {
-                labels: ['Google Ads', 'Facebook Ads', 'Telesales', 'Referral', 'Organic', 'Partner'],
-                datasets: [{
-                    data: [25, 20, 18, 15, 12, 10],
-                    backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']
-                }]
+          ],
+        },
+        channelDistribution: {
+          labels: [
+            "Google Ads",
+            "Facebook Ads",
+            "Telesales",
+            "Referral",
+            "Organic",
+            "Partner",
+          ],
+          datasets: [
+            {
+              data: [25, 20, 18, 15, 12, 10],
+              backgroundColor: [
+                "#2563eb",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+                "#14b8a6",
+              ],
             },
-            customerSegment: {
-                labels: ['Retail', 'VIP', 'SME', 'Corporate'],
-                datasets: [{
-                    data: [45, 25, 20, 10],
-                    backgroundColor: ['#2563eb', '#f59e0b', '#10b981', '#ef4444']
-                }]
-            }
-        };
+          ],
+        },
+        customerSegment: {
+          labels: ["Retail", "VIP", "SME", "Corporate"],
+          datasets: [
+            {
+              data: [45, 25, 20, 10],
+              backgroundColor: ["#2563eb", "#f59e0b", "#10b981", "#ef4444"],
+            },
+          ],
+        },
+      };
 
-        // Khởi tạo biểu đồ
-        function initCharts() {
-            // Biểu đồ xu hướng tài khoản
-            const accountTrendCtx = document.getElementById('accountTrendChart').getContext('2d');
-            new Chart(accountTrendCtx, {
-                type: 'line',
-                data: sampleData.accountTrend,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0,0,0,0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ phân bổ kênh
-            const channelDistributionCtx = document.getElementById('channelDistributionChart').getContext('2d');
-            new Chart(channelDistributionCtx, {
-                type: 'doughnut',
-                data: sampleData.channelDistribution,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ phân loại khách hàng
-            const customerSegmentCtx = document.getElementById('customerSegmentChart').getContext('2d');
-            new Chart(customerSegmentCtx, {
-                type: 'pie',
-                data: sampleData.customerSegment,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ thời gian đến giao dịch đầu tiên
-            const timeToFirstTransactionCtx = document.getElementById('timeToFirstTransactionChart').getContext('2d');
-            new Chart(timeToFirstTransactionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['1-3 ngày', '4-7 ngày', '8-14 ngày', '15-30 ngày', '>30 ngày'],
-                    datasets: [{
-                        label: 'Số khách hàng',
-                        data: [850, 1200, 1800, 950, 625],
-                        backgroundColor: '#10b981'
-                    }]
+      // Khởi tạo biểu đồ
+      function initCharts() {
+        // Biểu đồ xu hướng tài khoản
+        const accountTrendCtx = document
+          .getElementById("accountTrendChart")
+          .getContext("2d");
+        new Chart(accountTrendCtx, {
+          type: "line",
+          data: sampleData.accountTrend,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(0,0,0,0.1)",
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ retention
-            const retentionCtx = document.getElementById('retentionChart').getContext('2d');
-            new Chart(retentionCtx, {
-                type: 'line',
-                data: {
-                    labels: ['7 ngày', '14 ngày', '30 ngày', '60 ngày', '90 ngày'],
-                    datasets: [{
-                        label: 'Retention Rate (%)',
-                        data: [85, 78, 72, 68, 65],
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
+              },
+              x: {
+                grid: {
+                  display: false,
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ hiệu quả kênh
-            const channelEffectivenessCtx = document.getElementById('channelEffectivenessChart').getContext('2d');
-            new Chart(channelEffectivenessCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Google Ads', 'Facebook Ads', 'Telesales', 'Referral', 'Organic', 'Partner'],
-                    datasets: [{
-                        label: 'Số tài khoản',
-                        data: [3855, 3084, 2776, 2313, 1850, 1542],
-                        backgroundColor: '#2563eb',
-                        yAxisID: 'y'
-                    }, {
-                        label: 'Conversion Rate (%)',
-                        data: [22, 18, 35, 42, 28, 25],
-                        backgroundColor: '#10b981',
-                        type: 'line',
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false,
-                            },
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ CAC vs LTV
-            const cacLtvCtx = document.getElementById('cacLtvChart').getContext('2d');
-            new Chart(cacLtvCtx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Kênh Marketing',
-                        data: [
-                            {x: 1500, y: 6500, label: 'Google Ads'},
-                            {x: 1800, y: 5200, label: 'Facebook Ads'},
-                            {x: 2200, y: 8800, label: 'Telesales'},
-                            {x: 800, y: 4200, label: 'Referral'},
-                            {x: 500, y: 2800, label: 'Organic'},
-                            {x: 1200, y: 4800, label: 'Partner'}
-                        ],
-                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'CAC (nghìn VND)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'LTV (nghìn VND)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ conversion rate theo kênh
-            const channelConversionCtx = document.getElementById('channelConversionChart').getContext('2d');
-            new Chart(channelConversionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Referral', 'Telesales', 'Organic', 'Partner', 'Google Ads', 'Facebook Ads'],
-                    datasets: [{
-                        label: 'Conversion Rate (%)',
-                        data: [42.3, 35.2, 28.1, 25.4, 22.1, 18.3],
-                        backgroundColor: ['#ef4444', '#f59e0b', '#8b5cf6', '#14b8a6', '#2563eb', '#10b981']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ timeline chuyển đổi
-            const conversionTimelineCtx = document.getElementById('conversionTimelineChart').getContext('2d');
-            new Chart(conversionTimelineCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Ngày 1', 'Ngày 2', 'Ngày 3', 'Ngày 7', 'Ngày 14', 'Ngày 30'],
-                    datasets: [{
-                        label: 'Tỷ lệ hoàn tất KYC (%)',
-                        data: [45, 68, 78, 85, 85, 85],
-                        borderColor: '#14b8a6',
-                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'Tỷ lệ có giao dịch (%)',
-                        data: [8, 12, 18, 24, 27, 29],
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ phân bổ thời gian KYC
-            const kycTimeDistributionCtx = document.getElementById('kycTimeDistributionChart').getContext('2d');
-            new Chart(kycTimeDistributionCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['< 1 ngày', '1-2 ngày', '2-3 ngày', '3-5 ngày', '> 5 ngày'],
-                    datasets: [{
-                        data: [25, 35, 20, 15, 5],
-                        backgroundColor: ['#10b981', '#14b8a6', '#f59e0b', '#f97316', '#ef4444']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Biểu đồ chuyển đổi nhanh
-            const fastConversionCtx = document.getElementById('fastConversionChart').getContext('2d');
-            new Chart(fastConversionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['24h', '48h', '72h', '7 ngày'],
-                    datasets: [{
-                        label: 'Tỷ lệ chuyển đổi (%)',
-                        data: [8.5, 15.2, 22.8, 35.4],
-                        backgroundColor: ['#10b981', '#14b8a6', '#f59e0b', '#2563eb']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // Toggle theme
-        function toggleTheme() {
-            document.body.classList.toggle('dark-theme');
-            const themeIcon = document.querySelector('.theme-toggle i');
-            if (document.body.classList.contains('dark-theme')) {
-                themeIcon.className = 'fas fa-sun';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.className = 'fas fa-moon';
-                localStorage.setItem('theme', 'light');
-            }
-        }
-
-        // Load saved theme
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-                document.querySelector('.theme-toggle i').className = 'fas fa-sun';
-            }
-        }
-
-        // Update last update time
-        function updateLastUpdateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString('vi-VN');
-            document.getElementById('lastUpdate').textContent = `Cập nhật: ${timeString}`;
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTheme();
-            initCharts();
-            updateLastUpdateTime();
-            
-            // Update time every minute
-            setInterval(updateLastUpdateTime, 60000);
-            
-            // Add filter event listeners
-            document.getElementById('timeFilter').addEventListener('change', function() {
-                // Simulate data refresh
-                console.log('Time filter changed:', this.value);
-            });
-            
-            document.getElementById('channelFilter').addEventListener('change', function() {
-                console.log('Channel filter changed:', this.value);
-            });
-            
-            document.getElementById('regionFilter').addEventListener('change', function() {
-                console.log('Region filter changed:', this.value);
-            });
-            
-            document.getElementById('customerFilter').addEventListener('change', function() {
-                console.log('Customer filter changed:', this.value);
-            });
+              },
+            },
+          },
         });
+
+        // Biểu đồ phân bổ kênh
+        const channelDistributionCtx = document
+          .getElementById("channelDistributionChart")
+          .getContext("2d");
+        new Chart(channelDistributionCtx, {
+          type: "doughnut",
+          data: sampleData.channelDistribution,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+
+        // Biểu đồ phân loại khách hàng
+        const customerSegmentCtx = document
+          .getElementById("customerSegmentChart")
+          .getContext("2d");
+        new Chart(customerSegmentCtx, {
+          type: "pie",
+          data: sampleData.customerSegment,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+
+        // Biểu đồ thời gian đến giao dịch đầu tiên
+        const timeToFirstTransactionCtx = document
+          .getElementById("timeToFirstTransactionChart")
+          .getContext("2d");
+        new Chart(timeToFirstTransactionCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "1-3 ngày",
+              "4-7 ngày",
+              "8-14 ngày",
+              "15-30 ngày",
+              ">30 ngày",
+            ],
+            datasets: [
+              {
+                label: "Số khách hàng",
+                data: [850, 1200, 1800, 950, 625],
+                backgroundColor: "#10b981",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+
+        // Biểu đồ retention
+        const retentionCtx = document
+          .getElementById("retentionChart")
+          .getContext("2d");
+        new Chart(retentionCtx, {
+          type: "line",
+          data: {
+            labels: ["7 ngày", "14 ngày", "30 ngày", "60 ngày", "90 ngày"],
+            datasets: [
+              {
+                label: "Retention Rate (%)",
+                data: [85, 78, 72, 68, 65],
+                borderColor: "#8b5cf6",
+                backgroundColor: "rgba(139, 92, 246, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+              },
+            },
+          },
+        });
+
+        // Biểu đồ hiệu quả kênh
+        const channelEffectivenessCtx = document
+          .getElementById("channelEffectivenessChart")
+          .getContext("2d");
+        new Chart(channelEffectivenessCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Google Ads",
+              "Facebook Ads",
+              "Telesales",
+              "Referral",
+              "Organic",
+              "Partner",
+            ],
+            datasets: [
+              {
+                label: "Số tài khoản",
+                data: [3855, 3084, 2776, 2313, 1850, 1542],
+                backgroundColor: "#2563eb",
+                yAxisID: "y",
+              },
+              {
+                label: "Conversion Rate (%)",
+                data: [22, 18, 35, 42, 28, 25],
+                backgroundColor: "#10b981",
+                type: "line",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                grid: {
+                  drawOnChartArea: false,
+                },
+              },
+            },
+          },
+        });
+
+        // Biểu đồ CAC vs LTV
+        const cacLtvCtx = document
+          .getElementById("cacLtvChart")
+          .getContext("2d");
+        new Chart(cacLtvCtx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "Kênh Marketing",
+                data: [
+                  { x: 1500, y: 6500, label: "Google Ads" },
+                  { x: 1800, y: 5200, label: "Facebook Ads" },
+                  { x: 2200, y: 8800, label: "Telesales" },
+                  { x: 800, y: 4200, label: "Referral" },
+                  { x: 500, y: 2800, label: "Organic" },
+                  { x: 1200, y: 4800, label: "Partner" },
+                ],
+                backgroundColor: [
+                  "#2563eb",
+                  "#10b981",
+                  "#f59e0b",
+                  "#ef4444",
+                  "#8b5cf6",
+                  "#14b8a6",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "CAC (nghìn VND)",
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "LTV (nghìn VND)",
+                },
+              },
+            },
+          },
+        });
+
+        // Biểu đồ conversion rate theo kênh
+        const channelConversionCtx = document
+          .getElementById("channelConversionChart")
+          .getContext("2d");
+        new Chart(channelConversionCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Referral",
+              "Telesales",
+              "Organic",
+              "Partner",
+              "Google Ads",
+              "Facebook Ads",
+            ],
+            datasets: [
+              {
+                label: "Conversion Rate (%)",
+                data: [42.3, 35.2, 28.1, 25.4, 22.1, 18.3],
+                backgroundColor: [
+                  "#ef4444",
+                  "#f59e0b",
+                  "#8b5cf6",
+                  "#14b8a6",
+                  "#2563eb",
+                  "#10b981",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: "y",
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+
+        // Biểu đồ timeline chuyển đổi
+        const conversionTimelineCtx = document
+          .getElementById("conversionTimelineChart")
+          .getContext("2d");
+        new Chart(conversionTimelineCtx, {
+          type: "line",
+          data: {
+            labels: [
+              "Ngày 1",
+              "Ngày 2",
+              "Ngày 3",
+              "Ngày 7",
+              "Ngày 14",
+              "Ngày 30",
+            ],
+            datasets: [
+              {
+                label: "Tỷ lệ hoàn tất KYC (%)",
+                data: [45, 68, 78, 85, 85, 85],
+                borderColor: "#14b8a6",
+                backgroundColor: "rgba(20, 184, 166, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+              {
+                label: "Tỷ lệ có giao dịch (%)",
+                data: [8, 12, 18, 24, 27, 29],
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(37, 99, 235, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+              },
+            },
+          },
+        });
+
+        // Biểu đồ phân bổ thời gian KYC
+        const kycTimeDistributionCtx = document
+          .getElementById("kycTimeDistributionChart")
+          .getContext("2d");
+        new Chart(kycTimeDistributionCtx, {
+          type: "doughnut",
+          data: {
+            labels: [
+              "< 1 ngày",
+              "1-2 ngày",
+              "2-3 ngày",
+              "3-5 ngày",
+              "> 5 ngày",
+            ],
+            datasets: [
+              {
+                data: [25, 35, 20, 15, 5],
+                backgroundColor: [
+                  "#10b981",
+                  "#14b8a6",
+                  "#f59e0b",
+                  "#f97316",
+                  "#ef4444",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+
+        // Biểu đồ chuyển đổi nhanh
+        const fastConversionCtx = document
+          .getElementById("fastConversionChart")
+          .getContext("2d");
+        new Chart(fastConversionCtx, {
+          type: "bar",
+          data: {
+            labels: ["24h", "48h", "72h", "7 ngày"],
+            datasets: [
+              {
+                label: "Tỷ lệ chuyển đổi (%)",
+                data: [8.5, 15.2, 22.8, 35.4],
+                backgroundColor: ["#10b981", "#14b8a6", "#f59e0b", "#2563eb"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      // Toggle theme
+      function toggleTheme() {
+        document.body.classList.toggle("dark-theme");
+        const themeIcon = document.querySelector(".theme-toggle i");
+        if (document.body.classList.contains("dark-theme")) {
+          themeIcon.className = "fas fa-sun";
+          localStorage.setItem("theme", "dark");
+        } else {
+          themeIcon.className = "fas fa-moon";
+          localStorage.setItem("theme", "light");
+        }
+      }
+
+      // Load saved theme
+      function loadTheme() {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+          document.body.classList.add("dark-theme");
+          document.querySelector(".theme-toggle i").className = "fas fa-sun";
+        }
+      }
+
+      // Update last update time
+      function updateLastUpdateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString("vi-VN");
+        document.getElementById("lastUpdate").textContent =
+          `Cập nhật: ${timeString}`;
+      }
+
+      // Initialize dashboard
+      document.addEventListener("DOMContentLoaded", function () {
+        loadTheme();
+        initCharts();
+        updateLastUpdateTime();
+
+        // Update time every minute
+        setInterval(updateLastUpdateTime, 60000);
+
+        // Add filter event listeners
+        document
+          .getElementById("timeFilter")
+          .addEventListener("change", function () {
+            // Simulate data refresh
+            console.log("Time filter changed:", this.value);
+          });
+
+        document
+          .getElementById("channelFilter")
+          .addEventListener("change", function () {
+            console.log("Channel filter changed:", this.value);
+          });
+
+        document
+          .getElementById("regionFilter")
+          .addEventListener("change", function () {
+            console.log("Region filter changed:", this.value);
+          });
+
+        document
+          .getElementById("customerFilter")
+          .addEventListener("change", function () {
+            console.log("Customer filter changed:", this.value);
+          });
+      });
     </script>
-</body>
+  </body>
 </html>
