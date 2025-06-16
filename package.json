@@ -1,0 +1,21 @@
+{
+  "name": "static-html-project",
+  "version": "1.0.0",
+  "description": "Static HTML project with n8n workflow demonstrations",
+  "main": "test.html",
+  "scripts": {
+    "dev": "python3 -m http.server 3000 || python -m http.server 3000 || npx http-server -p 3000",
+    "start": "python3 -m http.server 3000 || python -m http.server 3000 || npx http-server -p 3000"
+  },
+  "keywords": [
+    "static",
+    "html",
+    "n8n",
+    "workflow"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
