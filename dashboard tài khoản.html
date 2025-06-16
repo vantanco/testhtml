@@ -706,7 +706,7 @@
             style="border-left-color: var(--warning-yellow)"
           >
             <div class="metric-header">
-              <span class="metric-title">Thời Gian Đến Giao Dịch Đầu</span>
+              <span class="metric-title">Thời Gian Đến Giao Dịch Đ���u</span>
               <i
                 class="fas fa-clock metric-icon"
                 style="color: var(--warning-yellow)"
@@ -1028,7 +1028,7 @@
             style="border-left-color: var(--warning-yellow)"
           >
             <div class="metric-header">
-              <span class="metric-title">Tỷ Lệ Drop-off KYC</span>
+              <span class="metric-title">T��� Lệ Drop-off KYC</span>
               <i
                 class="fas fa-user-times metric-icon"
                 style="color: var(--warning-yellow)"
@@ -1525,6 +1525,174 @@
                 title: {
                   display: true,
                   text: "LTV (nghìn VND)",
+                },
+              },
+            },
+          },
+        });
+
+        // Biểu đồ xu hướng doanh thu
+        const revenueTrendCtx = document
+          .getElementById("revenueTrendChart")
+          .getContext("2d");
+        new Chart(revenueTrendCtx, {
+          type: "line",
+          data: {
+            labels: [
+              "T1",
+              "T2",
+              "T3",
+              "T4",
+              "T5",
+              "T6",
+              "T7",
+              "T8",
+              "T9",
+              "T10",
+              "T11",
+              "T12",
+            ],
+            datasets: [
+              {
+                label: "Doanh thu (tỷ VND)",
+                data: [
+                  1.8, 2.1, 2.3, 2.0, 2.5, 2.4, 2.2, 2.7, 2.6, 2.9, 3.1, 2.8,
+                ],
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+              },
+              {
+                label: "Mục tiêu",
+                data: [
+                  2.0, 2.2, 2.4, 2.2, 2.6, 2.5, 2.3, 2.8, 2.7, 3.0, 3.2, 2.9,
+                ],
+                borderColor: "#f59e0b",
+                backgroundColor: "transparent",
+                borderDash: [5, 5],
+                tension: 0.4,
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(0,0,0,0.1)",
+                },
+                title: {
+                  display: true,
+                  text: "Doanh thu (tỷ VND)",
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+
+        // Biểu đồ doanh thu theo sản phẩm
+        const revenueByProductCtx = document
+          .getElementById("revenueByProductChart")
+          .getContext("2d");
+        new Chart(revenueByProductCtx, {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Đầu tư",
+              "Tiết kiệm",
+              "Bảo hiểm",
+              "Vay vốn",
+              "Thẻ tín dụng",
+            ],
+            datasets: [
+              {
+                data: [45, 25, 15, 10, 5],
+                backgroundColor: [
+                  "#2563eb",
+                  "#10b981",
+                  "#f59e0b",
+                  "#ef4444",
+                  "#8b5cf6",
+                ],
+                borderWidth: 2,
+                borderColor: "#ffffff",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  padding: 20,
+                },
+              },
+            },
+          },
+        });
+
+        // Biểu đồ so sánh tháng
+        const monthlyComparisonCtx = document
+          .getElementById("monthlyComparisonChart")
+          .getContext("2d");
+        new Chart(monthlyComparisonCtx, {
+          type: "bar",
+          data: {
+            labels: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"],
+            datasets: [
+              {
+                label: "Tháng này",
+                data: [680, 720, 750, 650],
+                backgroundColor: "#2563eb",
+                borderRadius: 4,
+              },
+              {
+                label: "Tháng trước",
+                data: [580, 620, 640, 600],
+                backgroundColor: "#94a3b8",
+                borderRadius: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(0,0,0,0.1)",
+                },
+                title: {
+                  display: true,
+                  text: "Doanh thu (triệu VND)",
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
                 },
               },
             },
