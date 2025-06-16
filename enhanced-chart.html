@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enhanced Interactive Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-blue: #3b82f6;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --purple: #8b5cf6;
+        --teal: #14b8a6;
+        --bg-light: #f8fafc;
+        --bg-white: #ffffff;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border-light: #e5e7eb;
+        --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-light);
+        color: var(--text-dark);
+        line-height: 1.6;
+      }
+
+      .chart-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--bg-white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-large);
+        border: 1px solid var(--border-light);
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-light);
+      }
+
+      .chart-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .chart-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+      }
+
+      .chart-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .control-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .control-select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        background: var(--bg-white);
+        color: var(--text-dark);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .control-select:hover {
+        border-color: var(--primary-blue);
+      }
+
+      .control-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: linear-gradient(135deg, var(--bg-white) 0%, #f9fafb 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-light);
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+      }
+
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-label {
+        font-size: 0.875rem;
+        color: var(--text-gray);
+        font-weight: 500;
+      }
+
+      .metric-change {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+      }
+
+      .positive {
+        color: var(--success-green);
+      }
+      .negative {
+        color: var(--danger-red);
+      }
+
+      .chart-wrapper {
+        position: relative;
+        height: 450px;
+        margin: 2rem 0;
+        padding: 1rem;
+        background: var(--bg-white);
+        border-radius: 12px;
+        border: 1px solid var(--border-light);
+      }
+
+      .chart-canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .chart-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .chart-tab {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-gray);
+        transition: all 0.2s ease;
+      }
+
+      .chart-tab.active {
+        color: var(--primary-blue);
+        border-bottom-color: var(--primary-blue);
+      }
+
+      .chart-tab:hover {
+        color: var(--text-dark);
+      }
+
+      .legend-custom {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-light);
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+      }
+
+      .loading-spinner {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        height: 400px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--border-light);
+        border-top: 4px solid var(--primary-blue);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .export-button {
+        padding: 0.5rem 1rem;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .export-button:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 768px) {
+        .chart-container {
+          margin: 1rem;
+          padding: 1rem;
+        }
+
+        .chart-header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .chart-controls {
+          flex-wrap: wrap;
+        }
+
+        .metrics-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .chart-wrapper {
+          height: 350px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chart-container">
+      <div class="chart-header">
+        <h1 class="chart-title">
+          <i class="fas fa-chart-line"></i>
+          Phân Tích Hiệu Suất Kinh Doanh
+        </h1>
+        <div class="chart-controls">
+          <div class="control-group">
+            <label class="control-label">Thời gian</label>
+            <select class="control-select" id="timeRange">
+              <option value="7days">7 ngày qua</option>
+              <option value="30days" selected>30 ngày qua</option>
+              <option value="90days">90 ngày qua</option>
+              <option value="1year">1 năm qua</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Loại dữ liệu</label>
+            <select class="control-select" id="dataType">
+              <option value="revenue" selected>Doanh thu</option>
+              <option value="customers">Khách hàng</option>
+              <option value="conversion">Tỷ lệ chuyển đổi</option>
+              <option value="retention">Retention</option>
+            </select>
+          </div>
+          <button class="export-button" id="exportChart">
+            <i class="fas fa-download"></i> Xuất
+          </button>
+        </div>
+      </div>
+
+      <!-- Metrics Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value" style="color: var(--primary-blue)">
+            2.8 tỷ
+          </div>
+          <div class="metric-label">Doanh thu tháng này</div>
+          <div class="metric-change positive">+18.5% vs tháng trước</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color: var(--success-green)">
+            15,420
+          </div>
+          <div class="metric-label">Khách hàng mới</div>
+          <div class="metric-change positive">+12.3% vs tháng trước</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color: var(--warning-orange)">
+            28.7%
+          </div>
+          <div class="metric-label">Tỷ lệ chuyển đổi</div>
+          <div class="metric-change negative">-2.1% vs tháng trước</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color: var(--purple)">73.4%</div>
+          <div class="metric-label">Retention 30 ngày</div>
+          <div class="metric-change positive">+5.8% vs tháng trước</div>
+        </div>
+      </div>
+
+      <!-- Chart Tabs -->
+      <div class="chart-tabs">
+        <button class="chart-tab active" data-chart="line">Xu hướng</button>
+        <button class="chart-tab" data-chart="bar">So sánh</button>
+        <button class="chart-tab" data-chart="doughnut">Phân bổ</button>
+        <button class="chart-tab" data-chart="radar">Hiệu suất</button>
+      </div>
+
+      <!-- Chart Container -->
+      <div class="chart-wrapper">
+        <div class="loading-spinner" id="loadingSpinner">
+          <div class="spinner"></div>
+        </div>
+        <canvas id="mainChart" class="chart-canvas"></canvas>
+      </div>
+
+      <!-- Custom Legend -->
+      <div class="legend-custom" id="customLegend">
+        <div class="legend-item">
+          <div
+            class="legend-color"
+            style="background: var(--primary-blue)"
+          ></div>
+          <span>Doanh thu thực tế</span>
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-color"
+            style="background: var(--success-green)"
+          ></div>
+          <span>Mục tiêu</span>
+        </div>
+        <div class="legend-item">
+          <div
+            class="legend-color"
+            style="background: var(--warning-orange)"
+          ></div>
+          <span>Dự báo</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Chart.js configuration
+      Chart.defaults.font.family = "'Inter', sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.color = "#6b7280";
+
+      let chartInstance = null;
+      let currentChartType = "line";
+
+      // Sample data for different chart types
+      const chartData = {
+        line: {
+          labels: ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4", "Tuần 5", "Tuần 6"],
+          datasets: [
+            {
+              label: "Doanh thu thực tế",
+              data: [680, 750, 820, 920, 880, 950],
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59, 130, 246, 0.1)",
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: "#3b82f6",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+            },
+            {
+              label: "Mục tiêu",
+              data: [700, 720, 800, 850, 900, 920],
+              borderColor: "#10b981",
+              backgroundColor: "transparent",
+              borderWidth: 2,
+              borderDash: [5, 5],
+              tension: 0.4,
+              pointBackgroundColor: "#10b981",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+              pointRadius: 4,
+            },
+            {
+              label: "Dự báo",
+              data: [null, null, null, null, 880, 950, 1020, 1100],
+              borderColor: "#f59e0b",
+              backgroundColor: "rgba(245, 158, 11, 0.1)",
+              borderWidth: 2,
+              borderDash: [10, 5],
+              tension: 0.4,
+              pointBackgroundColor: "#f59e0b",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+              pointRadius: 4,
+            },
+          ],
+        },
+        bar: {
+          labels: ["Q1", "Q2", "Q3", "Q4"],
+          datasets: [
+            {
+              label: "Năm nay",
+              data: [2800, 3200, 2900, 3400],
+              backgroundColor: "#3b82f6",
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+            {
+              label: "Năm trước",
+              data: [2400, 2800, 2600, 3000],
+              backgroundColor: "#94a3b8",
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+          ],
+        },
+        doughnut: {
+          labels: [
+            "Đầu tư",
+            "Tiết kiệm",
+            "Bảo hiểm",
+            "Vay vốn",
+            "Thẻ tín dụng",
+          ],
+          datasets: [
+            {
+              data: [45, 25, 15, 10, 5],
+              backgroundColor: [
+                "#3b82f6",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+              ],
+              borderWidth: 2,
+              borderColor: "#ffffff",
+              hoverBorderWidth: 4,
+            },
+          ],
+        },
+        radar: {
+          labels: [
+            "Doanh thu",
+            "Khách hàng",
+            "Chuyển đổi",
+            "Retention",
+            "Hiệu quả",
+            "ROI",
+          ],
+          datasets: [
+            {
+              label: "Hiệu suất hiện tại",
+              data: [85, 78, 72, 88, 92, 75],
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59, 130, 246, 0.2)",
+              pointBackgroundColor: "#3b82f6",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+              borderWidth: 2,
+            },
+            {
+              label: "Mục tiêu",
+              data: [90, 85, 80, 90, 95, 85],
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              pointBackgroundColor: "#10b981",
+              pointBorderColor: "#ffffff",
+              pointBorderWidth: 2,
+              borderWidth: 2,
+            },
+          ],
+        },
+      };
+
+      // Chart options
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: "index",
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            titleColor: "#ffffff",
+            bodyColor: "#ffffff",
+            borderColor: "#3b82f6",
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              title: function (context) {
+                return context[0].label;
+              },
+              label: function (context) {
+                const label = context.dataset.label || "";
+                const value = context.parsed.y || context.parsed;
+                return `${label}: ${typeof value === "number" ? value.toLocaleString() : value}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: "#6b7280",
+            },
+          },
+          y: {
+            grid: {
+              color: "rgba(0, 0, 0, 0.1)",
+            },
+            ticks: {
+              color: "#6b7280",
+              callback: function (value) {
+                return value.toLocaleString();
+              },
+            },
+          },
+        },
+        animation: {
+          duration: 1000,
+          easing: "easeInOutQuart",
+        },
+      };
+
+      // Initialize chart
+      function initChart(type = "line") {
+        const ctx = document.getElementById("mainChart").getContext("2d");
+
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        showLoading();
+
+        setTimeout(() => {
+          const config = {
+            type: type,
+            data: chartData[type],
+            options: {
+              ...chartOptions,
+              ...(type === "doughnut"
+                ? {
+                    plugins: {
+                      ...chartOptions.plugins,
+                      tooltip: {
+                        ...chartOptions.plugins.tooltip,
+                        callbacks: {
+                          label: function (context) {
+                            const total = context.dataset.data.reduce(
+                              (a, b) => a + b,
+                              0,
+                            );
+                            const percentage = (
+                              (context.parsed * 100) /
+                              total
+                            ).toFixed(1);
+                            return `${context.label}: ${context.parsed}% (${percentage}%)`;
+                          },
+                        },
+                      },
+                    },
+                  }
+                : {}),
+              ...(type === "radar"
+                ? {
+                    scales: {
+                      r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                          color: "#6b7280",
+                          stepSize: 20,
+                        },
+                        grid: {
+                          color: "rgba(0, 0, 0, 0.1)",
+                        },
+                      },
+                    },
+                  }
+                : {}),
+            },
+          };
+
+          chartInstance = new Chart(ctx, config);
+          hideLoading();
+
+          // Animate metrics
+          animateMetrics();
+        }, 500);
+      }
+
+      function showLoading() {
+        document.getElementById("loadingSpinner").style.display = "flex";
+        document.getElementById("mainChart").style.display = "none";
+      }
+
+      function hideLoading() {
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("mainChart").style.display = "block";
+      }
+
+      function animateMetrics() {
+        const metricValues = document.querySelectorAll(".metric-value");
+        metricValues.forEach((element, index) => {
+          gsap.fromTo(
+            element,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              delay: index * 0.1,
+              ease: "power2.out",
+            },
+          );
+        });
+      }
+
+      // Event listeners
+      document.addEventListener("DOMContentLoaded", function () {
+        initChart("line");
+
+        // Chart tabs
+        document.querySelectorAll(".chart-tab").forEach((tab) => {
+          tab.addEventListener("click", function () {
+            // Update active tab
+            document
+              .querySelectorAll(".chart-tab")
+              .forEach((t) => t.classList.remove("active"));
+            this.classList.add("active");
+
+            // Update chart
+            const chartType = this.dataset.chart;
+            currentChartType = chartType;
+            initChart(chartType);
+          });
+        });
+
+        // Time range selector
+        document
+          .getElementById("timeRange")
+          .addEventListener("change", function () {
+            initChart(currentChartType);
+          });
+
+        // Data type selector
+        document
+          .getElementById("dataType")
+          .addEventListener("change", function () {
+            initChart(currentChartType);
+          });
+
+        // Export button
+        document
+          .getElementById("exportChart")
+          .addEventListener("click", function () {
+            if (chartInstance) {
+              const link = document.createElement("a");
+              link.download = "business-chart.png";
+              link.href = chartInstance.toBase64Image();
+              link.click();
+            }
+          });
+      });
+
+      // Animate chart container on load
+      gsap.fromTo(
+        ".chart-container",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+      );
+    </script>
+  </body>
+</html>
