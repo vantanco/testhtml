@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản trị Tồn kho Kim cương</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.2.5/build/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-sankey@0.12.0/dist/chartjs-chart-sankey.min.js"></script>
+    <style>
+        :root {
+            --primary-light: #fff;
+            --secondary-light: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-light: #e5e7eb;
+            --glass-bg: rgba(255,255,255,0.85);
+            --glass-border: rgba(0,0,0,0.08);
+            --shadow-light: 0 1px 3px 0 rgba(0,0,0,0.08);
+            --shadow-large: 0 10px 20px -3px rgba(0,0,0,0.11);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass-bg);
+            padding: 1.8rem 2rem 1.1rem 2rem;
+            position: sticky; top: 0; z-index: 2;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow-light);
+        }
+        .dashboard-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dashboard-updated {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        .insight-section {
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            max-width: 1220px;
+            display: flex;
+            flex-direction: column;
+            gap: 3.5rem;
+        }
+        .chapter-section {
+            background: var(--glass-bg);
+            border: 1.5px solid var(--glass-border);
+            border-radius: 22px;
+            padding: 2.4rem 2rem 2rem 2rem;
+            position: relative;
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            animation: fadeIn 0.7s;
+        }
+        @keyframes fadeIn {
+            from { opacity:0; transform: translateY(24px);}
+            to { opacity:1; transform: none;}
+        }
+        .chapter-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+        .chapter-title {
+            font-family: 'Space Grotesk',sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .chapter-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: .45rem;
+            line-height: 1.45;
+        }
+        .chapter-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            opacity: 0.18;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(215px,1fr));
+            gap: 1.3rem;
+            margin-bottom: 2.2rem;
+        }
+        .metric-card {
+            background: var(--primary-light);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            padding: 1.3rem 1rem 1rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: 0.18s;
+        }
+        .metric-card:hover {
+            box-shadow: var(--shadow-large);
+            background: var(--secondary-light);
+            transform: scale(1.03);
+        }
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: .32rem;
+            display: block;
+        }
+        .metric-label {
+            font-size: .96rem;
+            color: var(--text-secondary);
+            margin-bottom: .3rem;
+        }
+        .metric-change {
+            font-size: .86rem;
+            padding: 0.23rem 0.65rem;
+            border-radius: 16px;
+            font-weight: 500;
+            background: rgba(16, 185, 129, 0.11);
+            color: var(--accent-green);
+            display: inline-block;
+        }
+        .metric-change.negative { background: rgba(239,68,68,0.10); color: var(--accent-red);}
+        .metric-change.warning { background: rgba(245,158,11,0.10); color: var(--accent-orange);}
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px,1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: var(--primary-light);
+            border: 1px solid var(--border-light);
+            border-radius: 13px;
+            padding: 1.2rem 1rem;
+            box-shadow: var(--shadow-light);
+            position: relative;
+        }
+        .chart-title {
+            font-size: 1.07rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.2rem;
+        }
+        .chart-wrapper {
+            height: 295px;
+            width: 100%;
+            position: relative;
+        }
+        .chart-canvas {
+            height: 100% !important;
+            width: 100% !important;
+            max-height: 295px;
+        }
+        .panel {
+            margin-top: 2.1rem;
+            border-radius: 13px;
+            border: 1px solid var(--accent-blue);
+            background: linear-gradient(120deg, #e0f2fe 0 50%, #ecfdf5 100%);
+            padding: 1.3rem 1.2rem;
+            box-shadow: var(--shadow-light);
+        }
+        .panel-title {
+            font-family: 'Space Grotesk',sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: .75rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .insight-list {
+            margin: 0; padding: 0 0 0 1.1rem;
+        }
+        .insight-list li {
+            margin-bottom: .2rem;
+            font-size: .97rem;
+            color: var(--text-primary);
+        }
+        .recommendation {
+            margin-top: .6rem;
+            background: var(--primary-light);
+            border-radius: 8px;
+            padding: 0.82rem 1rem;
+            border: 1px solid var(--border-light);
+            font-size: .97rem;
+        }
+        .recommendation strong { color: var(--accent-blue);}
+        @media (max-width: 900px) {
+            .insight-section {padding: 1.3rem;}
+            .chapter-section {padding: 1.3rem 1rem;}
+        }
+        @media (max-width: 700px) {
+            .dashboard-header {padding: 1rem;}
+            .chapter-header {flex-direction:column;gap:1rem;}
+            .chapter-number {align-self:flex-end;}
+            .metrics-grid {grid-template-columns: 1fr;}
+            .charts-container {grid-template-columns: 1fr;}
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div>
+            <div class="dashboard-title">DASHBOARD QUẢN TRỊ TỒN KHO KIM CƯƠNG</div>
+            <div style="margin-top:6px;color:var(--text-secondary);font-size:.97rem;">Giám sát sức khỏe tồn kho, cung-cầu & kiểm soát tài sản giá trị cao</div>
+        </div>
+        <div class="dashboard-updated">Cập nhật: 17/07/2025</div>
+    </div>
+    <div class="insight-section">
+        <!-- Chương 1: Sức khỏe Tồn kho -->
+        <div class="chapter-section">
+            <div class="chapter-header">
+                <div>
+                    <div class="chapter-title">Chương 1: Sức khỏe Tồn kho</div>
+                    <div class="chapter-subtitle">Đảm bảo tổng lượng và cơ cấu tồn kho tối ưu. Story: A) Biết lượng tồn & mức an toàn → B) Theo dõi vòng quay → C) Phát hiện tồn lâu → D) Zoom nhóm giá trị cao → E) Ước ngày phủ tồn.</div>
+                </div>
+                <div class="chapter-number">01</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">8,920 ct</span>
+                    <div class="metric-label">On-hand vs Safety Stock</div>
+                    <span class="metric-change warning">Thừa 1,100 ct</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">7.1 lần</span>
+                    <div class="metric-label">Vòng quay 12 tháng</div>
+                    <span class="metric-change">Đạt mục tiêu</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">12.3%</span>
+                    <div class="metric-label">% tồn >180 ngày</div>
+                    <span class="metric-change warning">Cần xử lý</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">8.6%</span>
+                    <div class="metric-label">Idle High-Value (>1ct, D-F, VS+)</div>
+                    <span class="metric-change negative">Tăng nhẹ</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">32 ngày</span>
+                    <div class="metric-label">Ngày phủ tồn bình quân</div>
+                    <span class="metric-change">Ổn định</span>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Lượng tồn vs Mức an toàn</div>
+                    <div class="chart-wrapper"><canvas id="chart1a" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Vòng quay tồn kho 12 tháng</div>
+                    <div class="chart-wrapper"><canvas id="chart1b" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">% tồn >180 ngày & Idle High-Value</div>
+                    <div class="chart-wrapper"><canvas id="chart1c" class="chart-canvas"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Storytelling & Insights</div>
+                <ul class="insight-list">
+                    <li>A. Tổng tồn kho vượt mức an toàn 14%, ưu tiên xả nhóm chậm luân chuyển.</li>
+                    <li>B. Vòng quay tốt (7.1), nhưng còn 12.3% hàng ứ động lâu.</li>
+                    <li>C. Hàng giá trị cao idle > 90 ngày tăng lên 8.6%.</li>
+                    <li>D. Dự kiến tồn đủ bán trong 32 ngày nếu không mua thêm.</li>
+                </ul>
+                <div class="recommendation">
+                    <strong>Đề xuất:</strong> Đẩy bán hàng lâu, kiểm soát bổ sung, ưu tiên nhóm high-value idle.
+                </div>
+            </div>
+        </div>
+        <!-- Chương 2: Phù hợp Cung – Cầu -->
+        <div class="chapter-section">
+            <div class="chapter-header">
+                <div>
+                    <div class="chapter-title">Chương 2: Phù hợp Cung – Cầu</div>
+                    <div class="chapter-subtitle">Luôn có hàng bán, tránh mất doanh thu do hết hàng. Story: A) Đếm stock-out → B) Đo fill-rate → C) Dò SKU bán chạy thiếu cover → D) So forecast → E) Kiểm soát biến động KM.</div>
+                </div>
+                <div class="chapter-number">02</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">4 lần</span>
+                    <div class="metric-label">Stock-out 30 ngày</div>
+                    <span class="metric-change negative">Tăng</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">96.7%</span>
+                    <div class="metric-label">Order Fill Rate</div>
+                    <span class="metric-change">Ổn định</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">2 SKU</span>
+                    <div class="metric-label">Top SKU thiếu cover</div>
+                    <span class="metric-change warning">Cảnh báo sớm</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">7.2%</span>
+                    <div class="metric-label">Forecast MAPE</div>
+                    <span class="metric-change">Chấp nhận được</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">13.5%</span>
+                    <div class="metric-label">Promotion Demand Spike</div>
+                    <span class="metric-change warning">Nên dự báo kỹ</span>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Stock-out & Fill Rate theo tháng</div>
+                    <div class="chart-wrapper"><canvas id="chart2a" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">SKU bán chạy thiếu cover</div>
+                    <div class="chart-wrapper"><canvas id="chart2b" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Forecast vs Thực tế & Biến động KM</div>
+                    <div class="chart-wrapper"><canvas id="chart2c" class="chart-canvas"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Storytelling & Insights</div>
+                <ul class="insight-list">
+                    <li>A. Số lần stock-out tăng do khuyến mại đột biến.</li>
+                    <li>B. Fill rate vẫn cao, cảnh báo sớm 2 SKU hot sắp hết hàng.</li>
+                    <li>C. Forecast MAPE 7.2%, spike nhu cầu khi KM 13.5%.</li>
+                </ul>
+                <div class="recommendation">
+                    <strong>Hành động:</strong> Tăng min-max SKU hot, chủ động dự báo giai đoạn có khuyến mại.
+                </div>
+            </div>
+        </div>
+        <!-- Chương 3: Hiệu quả Mua hàng & Bổ sung -->
+        <div class="chapter-section">
+            <div class="chapter-header">
+                <div>
+                    <div class="chapter-title">Chương 3: Hiệu quả Mua hàng & Bổ sung</div>
+                    <div class="chapter-subtitle">Rút ngắn lead-time, mua đúng – kịp – đủ, giảm chi phí khẩn cấp. Story: A) Theo dõi lead-time → B) Rush order → C) Kiểm soát giá → D) Đúng hạn reorder → E) Đặt vs nhận.</div>
+                </div>
+                <div class="chapter-number">03</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">14 ngày</span>
+                    <div class="metric-label">Lead-time TB nhà cung cấp</div>
+                    <span class="metric-change">Cải thiện</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">6.2%</span>
+                    <div class="metric-label">Tỷ lệ đơn hàng khẩn</div>
+                    <span class="metric-change warning">Cần kiểm soát</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">-2.8%</span>
+                    <div class="metric-label">PO Cost Variance</div>
+                    <span class="metric-change">Dưới ngân sách</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">92.1%</span>
+                    <div class="metric-label">Reorder đúng hạn</div>
+                    <span class="metric-change">Đạt mục tiêu</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">0.7%</span>
+                    <div class="metric-label">Receipt Variance</div>
+                    <span class="metric-change">Ổn định</span>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Lead-time & Rush Order</div>
+                    <div class="chart-wrapper"><canvas id="chart3a" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">PO Cost Variance & Reorder Adherence</div>
+                    <div class="chart-wrapper"><canvas id="chart3b" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Receipt Variance theo tháng</div>
+                    <div class="chart-wrapper"><canvas id="chart3c" class="chart-canvas"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Storytelling & Insights</div>
+                <ul class="insight-list">
+                    <li>A. Lead-time trung bình giảm còn 14 ngày.</li>
+                    <li>B. Đơn khẩn chiếm 6.2%, nên theo dõi sát.</li>
+                    <li>C. Giá mua thực thấp hơn kế hoạch 2.8%.</li>
+                    <li>D. Tỷ lệ reorder đúng hạn tăng, receipt variance thấp.</li>
+                </ul>
+                <div class="recommendation">
+                    <strong>Đề xuất:</strong> Đàm phán lead-time tốt hơn, kiểm soát đơn khẩn và gap đặt-nhận.
+                </div>
+            </div>
+        </div>
+        <!-- Chương 4: Giá trị & Rủi ro Tài chính -->
+        <div class="chapter-section">
+            <div class="chapter-header">
+                <div>
+                    <div class="chapter-title">Chương 4: Giá trị & Rủi ro Tài chính</div>
+                    <div class="chapter-subtitle">Theo dõi giá trị tồn so với thị trường, mức bảo hiểm & rủi ro FX. Story: A) Giá cost vs market → B) % Hedge → C) FX exposure → D) Slow-move → E) Insurance coverage.</div>
+                </div>
+                <div class="chapter-number">04</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">86.7%</span>
+                    <div class="metric-label">Cost-to-Market Ratio</div>
+                    <span class="metric-change">Đạt mục tiêu</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">54.2%</span>
+                    <div class="metric-label">% hàng được hedge</div>
+                    <span class="metric-change warning">Có thể tăng</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">23 tỷ</span>
+                    <div class="metric-label">FX Exposure (USD/VND)</div>
+                    <span class="metric-change warning">Rủi ro tiềm ẩn</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">9.7%</span>
+                    <div class="metric-label">Slow-Move Value</div>
+                    <span class="metric-change warning">Nên giảm thêm</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">94.8%</span>
+                    <div class="metric-label">Insurance Coverage</div>
+                    <span class="metric-change">Tốt</span>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Cost-to-Market & Hedge Ratio</div>
+                    <div class="chart-wrapper"><canvas id="chart4a" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">FX Exposure & Insurance Coverage</div>
+                    <div class="chart-wrapper"><canvas id="chart4b" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Slow-Move Value theo tháng</div>
+                    <div class="chart-wrapper"><canvas id="chart4c" class="chart-canvas"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Storytelling & Insights</div>
+                <ul class="insight-list">
+                    <li>A. Cost/market ratio tốt, 54% hàng đã hedge.</li>
+                    <li>B. FX exposure còn lớn (23 tỷ).</li>
+                    <li>C. Giá trị slow-move còn gần 10%.</li>
+                    <li>D. Insurance phủ 94.8% giá trị thị trường.</li>
+                </ul>
+                <div class="recommendation">
+                    <strong>Khuyến nghị:</strong> Đẩy mạnh hedge, review policy FX, giảm slow-move.
+                </div>
+            </div>
+        </div>
+        <!-- Chương 5: Độ chính xác & Thất thoát -->
+        <div class="chapter-section">
+            <div class="chapter-header">
+                <div>
+                    <div class="chapter-title">Chương 5: Độ chính xác & Thất thoát</div>
+                    <div class="chapter-subtitle">Giảm sai lệch kiểm kê, ngăn mất mát kim cương. Story: A) Đo kiểm kê → B) Shrinkage → C) Tần suất sai lệch → D) Thời gian xử lý → E) Số sự cố bảo mật.</div>
+                </div>
+                <div class="chapter-number">05</div>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">99.6%</span>
+                    <div class="metric-label">Inventory Accuracy</div>
+                    <span class="metric-change">Đạt chuẩn</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">120tr</span>
+                    <div class="metric-label">Shrinkage Value</div>
+                    <span class="metric-change negative">Tăng so với Q1</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">1.8%</span>
+                    <div class="metric-label">Discrepancy Rate</div>
+                    <span class="metric-change warning">Cảnh báo</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">2.4 ngày</span>
+                    <div class="metric-label">Reconciliation Lead Time</div>
+                    <span class="metric-change">Đã cải thiện</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">1 sự cố</span>
+                    <div class="metric-label">Security Incident YTD</div>
+                    <span class="metric-change warning">Báo cáo kịp thời</span>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Inventory Accuracy & Shrinkage</div>
+                    <div class="chart-wrapper"><canvas id="chart5a" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Tỷ lệ Discrepancy & Lead Time</div>
+                    <div class="chart-wrapper"><canvas id="chart5b" class="chart-canvas"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Security Incidents qua các quý</div>
+                    <div class="chart-wrapper"><canvas id="chart5c" class="chart-canvas"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Storytelling & Insights</div>
+                <ul class="insight-list">
+                    <li>A. Độ chính xác kiểm kê duy trì ở 99.6%.</li>
+                    <li>B. Shrinkage tăng, cần truy vết nhóm giá trị cao.</li>
+                    <li>C. Discrepancy rate tăng nhẹ, thời gian xử lý giảm.</li>
+                    <li>D. Sự cố bảo mật đã được phát hiện & khắc phục nhanh.</li>
+                </ul>
+                <div class="recommendation">
+                    <strong>Hành động:</strong> Kiểm kê đột xuất nhóm high-value, review quy trình bảo mật.
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // CHART COLOR PALETTE
+    const palette = [
+        "#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#6b7280"
+    ];
+    // Common chart config
+    const commonConfig = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#1f2937',
+                    font: {family: 'Inter', size: 13},
+                    padding: 15
+                }
+            }
+        }
+    };
+    const lineChartOpt = {
+        ...commonConfig,
+        scales: {
+            x: {
+                type: 'category',
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, maxRotation: 45, display: true, align: 'center' },
+                grid: { color: 'rgba(0,0,0,0.07)', display: true },
+                offset: true
+            },
+            y: {
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, beginAtZero: true },
+                grid: {color: 'rgba(0,0,0,0.07)'}
+            }
+        }
+    };
+    const barChartOpt = {
+        ...commonConfig,
+        scales: {
+            x: {
+                type: 'category',
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, maxRotation: 45, display: true, align: 'center' },
+                grid: { color: 'rgba(0,0,0,0.07)', display: true },
+                offset: true
+            },
+            y: {
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, beginAtZero: true },
+                grid: {color: 'rgba(0,0,0,0.07)'}
+            }
+        }
+    };
+    const horizontalBarOpt = {
+        ...commonConfig,
+        indexAxis: 'y',
+        scales: {
+            x: {
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, beginAtZero: true },
+                grid: {color: 'rgba(0,0,0,0.07)'}
+            },
+            y: {
+                type: 'category',
+                ticks: { color: '#6b7280', font: {family: 'Inter'}, display: true, align: 'center' },
+                grid: { color: 'rgba(0,0,0,0.07)', display: true }
+            }
+        }
+    };
+    const doughnutChartOpt = {
+        ...commonConfig,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: '#1f2937', padding: 16, font: {family: 'Inter', size: 13} }
+            }
+        }
+    };
+    window.addEventListener("DOMContentLoaded", () => {
+        // CHƯƠNG 1
+        new Chart(chart1a, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["On-hand (ct)", "Safety Stock (ct)"],
+                datasets: [{
+                    label: "Số lượng",
+                    data: [8920, 7820],
+                    backgroundColor: [palette[0],palette[1]]
+                }]
+            }
+        });
+        new Chart(chart1b, {
+            type: "line",
+            options: lineChartOpt,
+            data: {
+                labels: ["Q3/24","Q4/24","Q1/25","Q2/25"],
+                datasets: [{
+                    label: "Vòng quay tồn kho",
+                    data: [6.3,6.8,7.2,7.1],
+                    borderColor: palette[0],
+                    backgroundColor: "rgba(59,130,246,0.12)",
+                    tension: 0.4,
+                    borderWidth: 3,
+                    fill: true
+                }]
+            }
+        });
+        new Chart(chart1c, {
+            type: "bar",
+            options: horizontalBarOpt,
+            data: {
+                labels: [">180 ngày (%)", "Idle High-Value (%)"],
+                datasets: [{
+                    label: "Tỷ lệ (%)",
+                    data: [12.3,8.6],
+                    backgroundColor: [palette[2],palette[3]]
+                }]
+            }
+        });
+        // CHƯƠNG 2
+        new Chart(chart2a, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "Stock-out",
+                        data: [1,0,2,2,3,4],
+                        backgroundColor: palette[3]
+                    },
+                    {
+                        label: "Fill Rate (%)",
+                        data: [98.3,98,97.5,97.2,96.8,96.7],
+                        backgroundColor: palette[0],
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...barChartOpt,
+                scales: {
+                    ...barChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 90,
+                        max: 100,
+                        ticks: { color: palette[0] }
+                    }
+                }
+            }
+        });
+        new Chart(chart2b, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["SKU01","SKU03"],
+                datasets: [{
+                    label: "Số ngày còn tồn (DoS)",
+                    data: [11,8],
+                    backgroundColor: palette
+                }]
+            }
+        });
+        new Chart(chart2c, {
+            type: "line",
+            options: lineChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "MAPE (%)",
+                        data: [8.1,7.4,7.2,6.8,7.1,7.2],
+                        borderColor: palette[1],
+                        backgroundColor: "rgba(16,185,129,0.11)",
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: "Promotion Spike (%)",
+                        data: [12,15,11,9,14,13.5],
+                        borderColor: palette[2],
+                        backgroundColor: "rgba(245,158,11,0.12)",
+                        tension: 0.2,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...lineChartOpt,
+                scales: {
+                    ...lineChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 0,
+                        max: 20,
+                        ticks: { color: palette[2] }
+                    }
+                }
+            }
+        });
+        // CHƯƠNG 3
+        new Chart(chart3a, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "Lead-time (ngày)",
+                        data: [18,16,16,15,14,14],
+                        backgroundColor: palette[0]
+                    },
+                    {
+                        label: "Rush PO Ratio (%)",
+                        data: [7.4,7.1,6.7,6.5,6.4,6.2],
+                        backgroundColor: palette[2],
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...barChartOpt,
+                scales: {
+                    ...barChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 0,
+                        max: 10,
+                        ticks: { color: palette[2] }
+                    }
+                }
+            }
+        });
+        new Chart(chart3b, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "PO Cost Var (%)",
+                        data: [-2.3,-2.6,-2.2,-2.8,-2.5,-2.8],
+                        backgroundColor: palette[1]
+                    },
+                    {
+                        label: "Reorder Adherence (%)",
+                        data: [91,89,90,91.5,91.8,92.1],
+                        backgroundColor: palette[0],
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...barChartOpt,
+                scales: {
+                    ...barChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 80,
+                        max: 100,
+                        ticks: { color: palette[0] }
+                    }
+                }
+            }
+        });
+        new Chart(chart3c, {
+            type: "line",
+            options: lineChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [{
+                    label: "Receipt Var (%)",
+                    data: [0.6,0.8,0.7,0.9,0.7,0.7],
+                    borderColor: palette[4],
+                    backgroundColor: "rgba(139,92,246,0.10)",
+                    tension: 0.3,
+                    fill: true
+                }]
+            }
+        });
+        // CHƯƠNG 4
+        new Chart(chart4a, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "Cost-to-Market (%)",
+                        data: [86.9,86.6,86.7,86.4,86.8,86.7],
+                        backgroundColor: palette[0]
+                    },
+                    {
+                        label: "Hedge (%)",
+                        data: [49,51,52.8,53.2,54.2,54.2],
+                        backgroundColor: palette[1]
+                    }
+                ]
+            }
+        });
+        new Chart(chart4b, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "FX Exposure (tỷ)",
+                        data: [19,20,20,21,22,23],
+                        backgroundColor: palette[3]
+                    },
+                    {
+                        label: "Insurance (%)",
+                        data: [91,92,92.8,93.6,94.1,94.8],
+                        backgroundColor: palette[2]
+                    }
+                ]
+            }
+        });
+        new Chart(chart4c, {
+            type: "line",
+            options: lineChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [{
+                    label: "Slow-Move Value (%)",
+                    data: [12.2,10.7,10.2,9.9,9.8,9.7],
+                    borderColor: palette[1],
+                    backgroundColor: "rgba(16,185,129,0.08)",
+                    tension: 0.3,
+                    fill: true
+                }]
+            }
+        });
+        // CHƯƠNG 5
+        new Chart(chart5a, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "Inventory Accuracy (%)",
+                        data: [99.3,99.5,99.6,99.6,99.6,99.6],
+                        backgroundColor: palette[0]
+                    },
+                    {
+                        label: "Shrinkage (tr)",
+                        data: [68,72,93,104,110,120],
+                        backgroundColor: palette[3],
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...barChartOpt,
+                scales: {
+                    ...barChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 0,
+                        max: 150,
+                        ticks: { color: palette[3] }
+                    }
+                }
+            }
+        });
+        new Chart(chart5b, {
+            type: "line",
+            options: lineChartOpt,
+            data: {
+                labels: ["T2","T3","T4","T5","T6","T7"],
+                datasets: [
+                    {
+                        label: "Discrepancy Rate (%)",
+                        data: [1.5,1.6,1.8,1.8,1.7,1.8],
+                        borderColor: palette[2],
+                        backgroundColor: "rgba(245,158,11,0.11)",
+                        tension: 0.2,
+                        fill: true
+                    },
+                    {
+                        label: "Lead Time (ngày)",
+                        data: [3.1,3,2.7,2.6,2.5,2.4],
+                        borderColor: palette[1],
+                        backgroundColor: "rgba(16,185,129,0.09)",
+                        tension: 0.2,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                ...lineChartOpt,
+                scales: {
+                    ...lineChartOpt.scales,
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        beginAtZero: true,
+                        min: 0,
+                        max: 5,
+                        ticks: { color: palette[1] }
+                    }
+                }
+            }
+        });
+        new Chart(chart5c, {
+            type: "bar",
+            options: barChartOpt,
+            data: {
+                labels: ["Q3/24","Q4/24","Q1/25","Q2/25"],
+                datasets: [{
+                    label: "Security Incident (sự cố)",
+                    data: [0,1,2,1],
+                    backgroundColor: palette[5]
+                }]
+            }
+        });
+    });
+    </script>
+</body>
+</html>
