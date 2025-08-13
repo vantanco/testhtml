@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lark Bitable — Search (POST) Fetch Tester — No Mapping</title>
+  <style>
+    :root{ --ink:#0b0b0b; --muted:#6b7280; --border:#e5e7eb; --bg:#f8fafc; --card:#ffffff; --accent:#0ea5e9; }
+    *{box-sizing:border-box}
+    body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+    header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:center}
+    header strong{font-size:15px}
+    .wrap{display:grid;gap:14px;padding:14px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card h3{margin:0;padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px}
+    .card .content{padding:12px}
+    .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+    @media(max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+    label{font-size:12px;color:var(--muted)}
+    input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+    textarea{min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    button{border:1px solid #cfe9f7;background:var(--accent);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
+    button.link{background:#fff;color:var(--accent)}
+    .muted{color:var(--muted);font-size:12px}
+    pre{background:#0b1020;color:#e6edf3;border-radius:10px;padding:12px;overflow:auto}
+    .status{margin-left:8px;font-size:12px}
+    .danger{color:#b42318}
+    code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px}
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Lark Bitable — Search (POST) Fetch Tester</strong>
+    <span id="status" class="status"></span>
+  </header>
+
+  <div class="wrap">
+    <section class="card">
+      <h3>Thiết lập & Body</h3>
+      <div class="content">
+        <div class="grid">
+          <div>
+            <label>Region</label>
+            <select id="region">
+              <option value="intl">International (open.larksuite.com)</option>
+              <option value="cn">China (open.feishu.cn)</option>
+            </select>
+          </div>
+          <div>
+            <label>App Token (Base/App)</label>
+            <input id="appToken" placeholder="app_token (basc…/bascn…)" />
+          </div>
+          <div>
+            <label>Table ID</label>
+            <input id="tableId" placeholder="tbl…" />
+          </div>
+          <div>
+            <label>Tenant Access Token</label>
+            <input id="tenantToken" placeholder="eyJ… hoặc t-…" />
+          </div>
+          <div>
+            <label>user_id_type (tuỳ chọn)</label>
+            <select id="userIdType">
+              <option value="">(mặc định)</option>
+              <option value="user_id">user_id</option>
+              <option value="open_id">open_id</option>
+              <option value="union_id">union_id</option>
+            </select>
+          </div>
+          <div>
+            <label>page_size</label>
+            <input id="pageSize" type="number" min="1" max="500" value="20" />
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label>Body JSON (mặc định `{}` giống cURL của bạn)</label>
+          <textarea id="bodyJson">{}</textarea>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="btnSearch">POST /records/search</button>
+          <button id="btnCurl" class="link">Copy cURL (POST)</button>
+          <button id="btnSave" class="link">Lưu thiết lập</button>
+          <button id="btnClear" class="link">Xoá thiết lập</button>
+          <span class="muted">⚠️ POST sẽ tạo <em>preflight</em>. Nếu trình duyệt báo <code>TypeError: Failed to fetch</code> còn cURL OK → đó là <strong>CORS</strong>. Khi chạy thật, hãy gọi qua proxy server.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Kết quả</h3>
+      <div class="content">
+        <div class="row" style="align-items:center"><span class="muted">Request:</span> <code id="req">—</code></div>
+        <div class="row" style="align-items:center"><span class="muted">HTTP Status:</span> <code id="httpStatus">—</code></div>
+        <div class="row" style="align-items:center"><span class="muted">Error:</span> <code id="errMsg">—</code></div>
+        <div style="margin-top:8px"><pre id="raw">/* JSON trả về sẽ hiển thị ở đây */</pre></div>
+      </div>
+    </section>
+  </div>
+
+<script>
+function $(id){ return document.getElementById(id); }
+function setStatus(msg, isErr=false){ const el=$('status'); el.textContent = msg||''; el.className = 'status' + (isErr? ' danger':'' ); }
+function regionBase(){ return $('region').value === 'cn' ? 'https://open.feishu.cn' : 'https://open.larksuite.com'; }
+
+function getSettings(){
+  return {
+    region: $('region').value,
+    appToken: $('appToken').value.trim(),
+    tableId: $('tableId').value.trim(),
+    tenantToken: $('tenantToken').value.trim(),
+    userIdType: $('userIdType').value.trim(),
+    pageSize: parseInt($('pageSize').value || '20', 10) || 20,
+    bodyJson: $('bodyJson').value
+  };
+}
+function saveSettings(){ localStorage.setItem('lark_search_tester', JSON.stringify(getSettings())); setStatus('Đã lưu thiết lập'); }
+function loadSettings(){ try{ const raw=localStorage.getItem('lark_search_tester'); if(!raw) return; const s=JSON.parse(raw); $('region').value=s.region||'intl'; $('appToken').value=s.appToken||''; $('tableId').value=s.tableId||''; $('tenantToken').value=s.tenantToken||''; $('userIdType').value=s.userIdType||''; $('pageSize').value=s.pageSize||20; $('bodyJson').value=s.bodyJson || '{}'; }catch{} }
+function clearSettings(){ localStorage.removeItem('lark_search_tester'); setStatus('Đã xoá thiết lập'); }
+
+function makeUrl(){
+  const s=getSettings();
+  const base=regionBase();
+  const u=new URL(`${base}/open-apis/bitable/v1/apps/${encodeURIComponent(s.appToken||'APP_TOKEN')}/tables/${encodeURIComponent(s.tableId||'TABLE_ID')}/records/search`);
+  if(s.userIdType) u.searchParams.set('user_id_type', s.userIdType);
+  if(s.pageSize) u.searchParams.set('page_size', String(Math.min(Math.max(s.pageSize,1),500)));
+  return u;
+}
+
+function copyCurl(){
+  const s=getSettings();
+  const url=makeUrl().toString();
+  const body = (s.bodyJson||'{}').trim() || '{}';
+  const curl = `curl -i -X POST '\n${url}\n' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer ${s.tenantToken||"TENANT_ACCESS_TOKEN"}' \\\n  -d '${body.replace(/'/g, "'\\''")}'`;
+  navigator.clipboard?.writeText(curl).then(()=>setStatus('Đã copy cURL (POST)')).catch(()=>setStatus('Không copy được cURL', true));
+}
+
+async function doSearch(){
+  const s=getSettings();
+  if(!s.tenantToken) { setStatus('Thiếu Tenant Access Token', true); return; }
+  const url = makeUrl(); $('req').textContent = `${url}`;
+  let body;
+  try{ body = s.bodyJson && s.bodyJson.trim()? JSON.parse(s.bodyJson) : {}; }
+  catch(e){ setStatus('Body JSON không hợp lệ', true); $('errMsg').textContent = String(e.message||e); return; }
+
+  setStatus('POST /records/search …');
+  try{
+    const res = await fetch(url, { method:'POST', headers:{ 'Authorization':`Bearer ${s.tenantToken}`, 'Content-Type':'application/json' }, body: JSON.stringify(body), mode:'cors', cache:'no-store', credentials:'omit' });
+    $('httpStatus').textContent = res.status + ' ' + res.statusText;
+    let data=null; try{ data = await res.json(); }catch{ data = { note:'Không đọc được JSON (CORS?).' }; }
+    $('raw').textContent = JSON.stringify(data, null, 2);
+    if(!res.ok){ throw new Error((data && (data.msg||data.message)) || ('HTTP '+res.status)); }
+    $('errMsg').textContent = '—'; setStatus('Fetch OK');
+  }catch(e){
+    $('errMsg').textContent = (e && (e.name+': '+e.message)) || 'Unknown error';
+    if(String(e.message||'').toLowerCase().includes('failed to fetch')){ setStatus('Failed to fetch — khả năng cao bị CORS (preflight OPTIONS bị chặn).', true); }
+    else setStatus('Fetch lỗi: ' + (e.message||'Unknown'), true);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  loadSettings();
+  $('btnSearch').onclick = doSearch;
+  $('btnCurl').onclick = copyCurl;
+  $('btnSave').onclick = saveSettings;
+  $('btnClear').onclick = ()=>{ clearSettings(); location.reload(); };
+});
+</script>
+</body>
+</html>
